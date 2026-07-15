@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>วงกลอน ๘ - ห้องแต่งกลอน</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <!-- Script สำหรับเกมเพลย์ -->
+    <script src="game.js" defer></script>
+
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+        .hidden-screen { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4 selection:bg-pink-500 relative">
+
+    <div id="app" class="w-full max-w-md bg-gray-800 rounded-3xl shadow-2xl p-6 text-center border border-gray-700">
+        
+        <!-- ================= SCREEN 1: WAITING ROOM ================= -->
+        <div id="screen-waiting" class="flex flex-col space-y-4">
+            <div class="flex items-center justify-between">
+                <span class="text-sm bg-purple-900/60 px-3 py-1 rounded-full text-purple-300 font-bold">ห้องกลอนสด</span>
+                <span id="host-badge" class="hidden-screen text-xs bg-yellow-500 text-gray-900 px-2 py-1 rounded font-bold">👑 Host</span>
+            </div>
+            <h2 class="text-3xl font-extrabold text-yellow-400">รหัสห้อง: <span id="display-room-code" class="text-white"></span></h2>
+            
+            <p class="text-gray-400 text-sm text-left">รายชื่อผู้ที่อยู่ในวงรอแต่งกลอน:</p>
+            <ul id="player-list" class="bg-gray-950 rounded-2xl p-4 space-y-2 text-left font-semibold max-h-56 overflow-y-auto border border-gray-700">
+                <!-- รายชื่อผู้เล่น -->
+            </ul>
+            
+            <div class="pt-2 flex flex-col gap-2">
+                <button id="btn-start-game" onclick="startGame()" class="w-full bg-green-600 hover:bg-green-500 text-white font-extrabold py-3.5 rounded-xl shadow-lg hidden-screen transition transform hover:scale-105">
+                    เริ่มวงแต่งกลอน! 🚀
+                </button>
+                <button onclick="leaveRoom()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold py-3 rounded-xl text-sm transition">
+                    ออกไปหน้าแรก
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= SCREEN 2: GAMEPLAY ================= -->
+        <div id="screen-game" class="hidden-screen flex flex-col space-y-6">
+            
+            <!-- หัวข้อแต่งกลอน -->
+            <div class="bg-gray-750 p-5 rounded-2xl border-2 border-dashed border-gray-500 relative">
+                <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-gray-900 px-4 py-1 rounded-full font-extrabold text-xs tracking-wider">หัวข้อแต่งกลอน</span>
+                <h2 id="current-theme" class="text-3xl font-black mt-2 text-white tracking-wide">กำลังสุ่ม...</h2>
+                <button id="btn-change-theme" onclick="changeTheme()" class="hidden-screen mt-3 text-xs text-yellow-400 underline hover:text-yellow-300 block mx-auto">เปลี่ยนหัวข้อใหม่ (Host)</button>
+            </div>
+
+            <!-- สถานะไพ่ของคนอื่นในวง -->
+            <div class="bg-gray-900/60 border border-gray-700 rounded-xl p-3">
+                <p class="text-gray-400 text-xs mb-2 font-bold text-left">สถานะไพ่ผู้เล่นอื่น:</p>
+                <div id="opponents-status" class="flex flex-wrap gap-2 justify-center text-xs">
+                    <!-- สถานะไพ่เพื่อน -->
+                </div>
+            </div>
+
+            <!-- ไพ่ในมือเรา -->
+            <div class="bg-gray-950 p-4 rounded-2xl border-2 border-pink-500 shadow-inner">
+                <p class="text-pink-400 text-sm font-extrabold mb-3">ไพ่ท่าทางของคุณ (<span id="my-card-count">0</span> ใบ)</p>
+                <div id="my-cards" class="grid grid-cols-1 gap-2 mt-2">
+                    <!-- ไพ่ของคุณ -->
+                </div>
+            </div>
+
+            <!-- ปุ่มจับโป๊ะ -->
+            <button onclick="triggerCatch()" class="w-full bg-red-600 hover:bg-red-500 text-white font-extrabold py-5 rounded-2xl text-2xl shadow-[0_8px_0_rgb(153,27,27)] active:translate-y-2 active:shadow-none transition-all">
+                🚨 จับโป๊ะเพื่อน! 🚨
+            </button>
+        </div>
+        
+        <!-- ================= SCREEN 3: END GAME ================= -->
+        <div id="screen-winner" class="hidden-screen flex flex-col space-y-4 py-8">
+            <h1 class="text-5xl font-black text-yellow-400 animate-bounce">🎉 ชนะแล้ว!</h1>
+            <p class="text-gray-300">ขอคารวะกวีเอกผู้แอบเนียนที่สุดในวง</p>
+            <h2 id="winner-name" class="text-4xl font-extrabold text-white bg-pink-600 py-3 rounded-2xl shadow-lg my-4">Name</h2>
+            <button onclick="leaveRoom()" class="mt-6 bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 rounded-xl w-full shadow-lg transition">
+                กลับหน้าหลัก (Lobby)
+            </button>
+        </div>
+
+    </div>
+
+    <!-- ================= MODAL: CATCHING (ใครตบไพ่?) ================= -->
+    <div id="modal-catch" class="hidden-screen fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 p-6 rounded-2xl w-full max-w-sm border border-red-500 flex flex-col space-y-4 shadow-2xl">
+            
+            <!-- กรณีเราเป็นคนตบไพ่ -->
+            <div id="catch-active" class="hidden-screen flex flex-col space-y-4 text-center">
+                <h2 class="text-2xl font-bold text-red-500 flex items-center justify-center gap-2">
+                    <span>🚨</span> คุณกดจับโป๊ะ!
+                </h2>
+                
+                <div class="text-left">
+                    <label class="text-xs text-yellow-400 font-bold mb-1 block">1. ใครคือคนที่แอบเนียนทำท่าทาง?</label>
+                    <select id="select-victim" class="w-full bg-gray-700 p-3 rounded-xl text-white outline-none border border-gray-600 font-semibold"></select>
+                </div>
+
+                <div class="text-left">
+                    <label class="text-xs text-yellow-400 font-bold mb-1 block">2. คุณจะใช้ไพ่ "ท่าทาง" ใบไหนจับผิด?</label>
+                    <select id="select-card" class="w-full bg-gray-700 p-3 rounded-xl text-white outline-none border border-gray-600 font-semibold"></select>
+                </div>
+
+                <button onclick="confirmCatch()" class="bg-green-600 hover:bg-green-500 py-3 rounded-xl font-bold text-lg mt-2 text-white shadow-lg transition">ยืนยันการจับโป๊ะ</button>
+                <button onclick="cancelCatch()" class="text-gray-400 underline text-sm mt-2 hover:text-white">ยกเลิก (กดผิด)</button>
+            </div>
+
+            <!-- กรณีคนอื่นตบไพ่ (เรานั่งดู) -->
+            <div id="catch-passive" class="hidden-screen text-center py-6">
+                <div class="animate-pulse text-6xl mb-4">🚨</div>
+                <h2 class="text-xl font-bold text-red-400"><span id="catcher-name-display" class="text-white underline">ใครบางคน</span> กำลังจับโป๊ะ!</h2>
+                <p class="text-gray-400 text-sm mt-2">โปรดรอให้กวีคนนั้นระบุเหยื่อและไพ่ที่จับคู่...</p>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>
