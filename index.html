@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สงครามวงกลอน 8 - กวีศรีวงเหล้า</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; }
+        .hidden-screen { display: none !important; }
+        .card-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4 selection:bg-pink-500">
+
+    <div id="app" class="w-full max-w-2xl bg-gray-800 rounded-3xl shadow-2xl p-6 sm:p-10 relative overflow-hidden">
+        
+        <!-- ================= SCREEN 1: SETUP ================= -->
+        <div id="screen-setup" class="flex flex-col space-y-6">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 pb-2">
+                สงครามวงกลอน 8
+            </h1>
+            <p class="text-center text-gray-400">เกมปาร์ตี้สายกวี เน้นจับโป๊ะแอคชั่น!</p>
+            
+            <div class="space-y-4 pt-4">
+                <label class="block text-lg font-semibold">จำนวนผู้เล่น (3-6 คน):</label>
+                <input type="number" id="player-count" min="3" max="6" value="4" class="w-full bg-gray-700 text-white p-4 rounded-xl text-xl text-center focus:ring-4 focus:ring-pink-500 outline-none">
+            </div>
+
+            <button onclick="startGame()" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-4 rounded-xl text-2xl transition transform hover:scale-105 active:scale-95 shadow-lg">
+                เริ่มตั้งวง!
+            </button>
+        </div>
+
+        <!-- ================= SCREEN 2: PEEK CARDS ================= -->
+        <div id="screen-peek" class="hidden-screen flex flex-col space-y-6 text-center">
+            <h2 class="text-3xl font-bold text-yellow-400" id="peek-title">ตาของใคร?</h2>
+            <p class="text-gray-300">กดเพื่อดูไพ่แอคชั่นของคุณ (จำไว้ให้ดีล่ะ!)</p>
+            
+            <div id="peek-cards" class="grid grid-cols-1 gap-4 hidden-screen">
+                <!-- Cards injected here -->
+            </div>
+
+            <button id="btn-show-cards" onclick="showPeekCards()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl text-xl shadow-lg">
+                กดเพื่อดูไพ่
+            </button>
+            <button id="btn-hide-cards" onclick="nextPeek()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl text-xl shadow-lg hidden-screen">
+                จำได้แล้ว! ปิดไพ่และส่งให้คนต่อไป
+            </button>
+        </div>
+
+        <!-- ================= SCREEN 3: MAIN GAME ================= -->
+        <div id="screen-game" class="hidden-screen flex flex-col space-y-8">
+            <!-- Theme Board -->
+            <div class="bg-gray-700 p-6 rounded-2xl text-center border-4 border-dashed border-gray-500 relative">
+                <span class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-gray-900 px-4 py-1 rounded-full font-bold text-sm">ธีมกลอนรอบนี้</span>
+                <h2 id="current-theme" class="text-3xl sm:text-4xl font-extrabold text-white mt-2">กำลังสุ่ม...</h2>
+                <button onclick="drawTheme()" class="mt-4 text-sm text-yellow-400 hover:text-yellow-300 underline">เปลี่ยนธีม</button>
+            </div>
+
+            <!-- Turn Indicator -->
+            <div class="text-center">
+                <p class="text-gray-400 mb-2">ตานี้ใครต้องแต่งกลอน?</p>
+                <h3 id="current-player" class="text-4xl font-bold text-pink-400 mb-4">Player</h3>
+                <button onclick="nextTurn()" class="px-8 py-3 bg-gray-600 hover:bg-gray-500 rounded-full font-bold text-lg shadow-md transition">
+                    แต่งจบแล้ว วนตาถัดไป 👉
+                </button>
+            </div>
+
+            <!-- BIG CATCH BUTTON -->
+            <div class="pt-6 border-t border-gray-600 text-center">
+                <button onclick="openCatchScreen()" class="w-full bg-red-600 hover:bg-red-500 text-white font-extrabold py-6 rounded-2xl text-3xl sm:text-4xl shadow-[0_10px_0_rgb(153,27,27)] active:shadow-[0_0px_0_rgb(153,27,27)] active:translate-y-2 transition-all">
+                    🚨 ตบไพ่จับโป๊ะ! 🚨
+                </button>
+                <p class="text-gray-400 text-sm mt-4">กดปุ่มนี้เมื่อเห็นคนอื่นทำท่าทางตรงกับไพ่ในมือเรา</p>
+            </div>
+
+            <!-- Player Stats -->
+            <div id="player-stats" class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm mt-4">
+                <!-- Stats injected here -->
+            </div>
+        </div>
+
+        <!-- ================= SCREEN 4: CATCH ACTION ================= -->
+        <div id="screen-catch" class="hidden-screen flex flex-col space-y-6">
+            <h2 class="text-3xl font-bold text-red-500 text-center">ใครเป็นคนตบไพ่?!</h2>
+            <div id="catcher-select" class="grid grid-cols-2 gap-4">
+                <!-- Buttons injected here -->
+            </div>
+            
+            <div id="catch-card-select" class="hidden-screen flex flex-col space-y-4">
+                <h3 class="text-xl text-center text-yellow-400">คุณใช้ไพ่ใบไหนจับโป๊ะเพื่อน?</h3>
+                <div id="catcher-cards" class="grid grid-cols-1 gap-2"></div>
+            </div>
+
+            <div id="victim-select" class="hidden-screen flex flex-col space-y-4">
+                <h3 class="text-xl text-center text-pink-400">ใครคือคนที่เผลอทำท่านี้? (โดนจั่วไพ่เพิ่ม)</h3>
+                <div id="victims" class="grid grid-cols-2 gap-4"></div>
+            </div>
+
+            <button onclick="cancelCatch()" class="mt-4 text-gray-400 hover:text-white underline text-center">ยกเลิก (กดผิด)</button>
+        </div>
+
+        <!-- ================= SCREEN 5: WINNER ================= -->
+        <div id="screen-winner" class="hidden-screen flex flex-col space-y-6 text-center py-10">
+            <h1 class="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 mb-4">
+                🎉 ชนะแล้ว! 🎉
+            </h1>
+            <h2 id="winner-name" class="text-4xl font-bold text-white mb-8">Player Name</h2>
+            <p class="text-xl text-gray-300">เป็นกวีเอกที่ไพ่หมดมือก่อนใครเพื่อน!</p>
+            <button onclick="location.reload()" class="mt-8 bg-pink-600 hover:bg-pink-500 text-white font-bold py-4 px-8 rounded-xl text-2xl">
+                เล่นอีกรอบ
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Game Data ---
+        const ALL_THEMES = ["อกหักรักคุด", "วันเงินเดือนออก", "หมูกระทะเยียวยาทุกสิ่ง", "เพื่อนซี้ผีบ้า", "ทริปเที่ยวทะเล", "แอบชอบคนมีเจ้าของ", "มนุษย์ออฟฟิศ", "ความลับที่บอกใครไม่ได้"];
+        const ALL_ACTIONS = [
+            "ไอ หรือ จาม", "หัวเราะเสียงดัง", "จับผม หรือ เกาหัว", "ถอนหายใจ", 
+            "พูดคำหยาบ", "ขยับแว่น หรือ ขยี้ตา", "ดื่มน้ำ", "หยิบ/จับมือถือ", 
+            "ยักไหล่", "ส่ายหน้า", "พยักหน้า", "ปรบมือ", "ชี้หน้าคนอื่น", 
+            "ลุกจากที่นั่ง", "ทำหน้าบึ้ง/คิ้วขมวด", "เผลอพูดภาษาอังกฤษ", "หลับตาตอนแต่งกลอน"
+        ];
+
+        // --- Game State ---
+        let state = {
+            players: [],
+            currentTheme: "",
+            currentPlayerTurn: 0,
+            peekIndex: 0,
+            deck: [],
+            
+            // Catch state
+            catcherIndex: -1,
+            selectedCardIndex: -1,
+        };
+
+        // --- Helper: Shuffle Array ---
+        function shuffle(array) {
+            return array.slice().sort(() => Math.random() - 0.5);
+        }
+
+        // --- Core Logic ---
+        function startGame() {
+            const count = parseInt(document.getElementById('player-count').value);
+            if(count < 3 || count > 6) return alert("โปรดเลือกผู้เล่น 3-6 คน");
+
+            // Setup Players
+            state.deck = shuffle([...ALL_ACTIONS, ...ALL_ACTIONS]); // Double the actions for a larger deck
+            for(let i=0; i<count; i++) {
+                state.players.push({
+                    id: i,
+                    name: `ผู้เล่นที่ ${i+1}`,
+                    hand: [drawCard(), drawCard(), drawCard()]
+                });
+            }
+
+            drawTheme();
+            showScreen('screen-peek');
+            setupPeekScreen();
+        }
+
+        function drawCard() {
+            if(state.deck.length === 0) state.deck = shuffle([...ALL_ACTIONS]);
+            return state.deck.pop();
+        }
+
+        function drawTheme() {
+            state.currentTheme = ALL_THEMES[Math.floor(Math.random() * ALL_THEMES.length)];
+            document.getElementById('current-theme').innerText = state.currentTheme;
+        }
+
+        // --- Peek Screen Logic ---
+        function setupPeekScreen() {
+            if(state.peekIndex >= state.players.length) {
+                // All players have peeked, start main game
+                showScreen('screen-game');
+                updateMainGameUI();
+                return;
+            }
+            
+            const player = state.players[state.peekIndex];
+            document.getElementById('peek-title').innerText = `ส่งเครื่องให้: ${player.name}`;
+            
+            document.getElementById('peek-cards').classList.add('hidden-screen');
+            document.getElementById('btn-show-cards').classList.remove('hidden-screen');
+            document.getElementById('btn-hide-cards').classList.add('hidden-screen');
+
+            // Render their cards
+            const cardsContainer = document.getElementById('peek-cards');
+            cardsContainer.innerHTML = '';
+            player.hand.forEach(card => {
+                cardsContainer.innerHTML += `
+                    <div class="bg-gradient-to-br from-purple-600 to-indigo-700 p-4 rounded-xl border border-purple-400 shadow-md card-pop">
+                        <span class="text-lg font-bold">${card}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function showPeekCards() {
+            document.getElementById('peek-cards').classList.remove('hidden-screen');
+            document.getElementById('btn-show-cards').classList.add('hidden-screen');
+            document.getElementById('btn-hide-cards').classList.remove('hidden-screen');
+        }
+
+        function nextPeek() {
+            state.peekIndex++;
+            setupPeekScreen();
+        }
+
+        // --- Main Game Logic ---
+        function updateMainGameUI() {
+            document.getElementById('current-player').innerText = state.players[state.currentPlayerTurn].name;
+            
+            const stats = document.getElementById('player-stats');
+            stats.innerHTML = '';
+            state.players.forEach(p => {
+                stats.innerHTML += `
+                    <div class="bg-gray-800 p-2 rounded-lg text-center border border-gray-600">
+                        <span class="font-bold text-pink-400">${p.name}</span><br>
+                        <span class="text-gray-400">ไพ่ ${p.hand.length} ใบ</span>
+                    </div>
+                `;
+            });
+        }
+
+        function nextTurn() {
+            state.currentPlayerTurn = (state.currentPlayerTurn + 1) % state.players.length;
+            updateMainGameUI();
+        }
+
+        // --- Catch (จับโป๊ะ) Logic ---
+        function openCatchScreen() {
+            showScreen('screen-catch');
+            resetCatchState();
+            
+            // Render Catchers (Who slapped?)
+            const catcherDiv = document.getElementById('catcher-select');
+            catcherDiv.innerHTML = '';
+            state.players.forEach((p, idx) => {
+                catcherDiv.innerHTML += `
+                    <button onclick="selectCatcher(${idx})" class="bg-gray-700 hover:bg-pink-600 p-4 rounded-xl font-bold text-lg transition">
+                        ${p.name}
+                    </button>
+                `;
+            });
+        }
+
+        function selectCatcher(index) {
+            state.catcherIndex = index;
+            document.getElementById('catcher-select').classList.add('hidden-screen');
+            document.getElementById('catch-card-select').classList.remove('hidden-screen');
+            
+            // Render Catcher's Hand
+            const handDiv = document.getElementById('catcher-cards');
+            handDiv.innerHTML = '';
+            state.players[index].hand.forEach((card, cardIdx) => {
+                handDiv.innerHTML += `
+                    <button onclick="selectCatchCard(${cardIdx})" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 p-4 rounded-xl font-bold text-lg text-left shadow-lg border border-purple-400">
+                        🎯 ${card}
+                    </button>
+                `;
+            });
+        }
+
+        function selectCatchCard(cardIndex) {
+            state.selectedCardIndex = cardIndex;
+            document.getElementById('catch-card-select').classList.add('hidden-screen');
+            document.getElementById('victim-select').classList.remove('hidden-screen');
+
+            // Render Victims
+            const victimDiv = document.getElementById('victims');
+            victimDiv.innerHTML = '';
+            state.players.forEach((p, idx) => {
+                if(idx !== state.catcherIndex) {
+                    victimDiv.innerHTML += `
+                        <button onclick="confirmCatch(${idx})" class="bg-gray-700 hover:bg-red-600 p-4 rounded-xl font-bold text-lg transition">
+                            ${p.name}
+                        </button>
+                    `;
+                }
+            });
+        }
+
+        function confirmCatch(victimIndex) {
+            // Apply Penalty
+            const catcher = state.players[state.catcherIndex];
+            const victim = state.players[victimIndex];
+            
+            // Remove used card from catcher
+            catcher.hand.splice(state.selectedCardIndex, 1);
+            
+            // Add new card to victim
+            victim.hand.push(drawCard());
+
+            alert(`ปังมาก! ${catcher.name} จับโป๊ะ ${victim.name} สำเร็จ!\n${victim.name} โดนจั่วไพ่เพิ่ม 1 ใบ และต้องแต่งกลอนวรรคนี้ใหม่!`);
+
+            // Check Win Condition
+            if(catcher.hand.length === 0) {
+                document.getElementById('winner-name').innerText = catcher.name;
+                showScreen('screen-winner');
+            } else {
+                // Next turn goes back to the victim who has to restart their poem line
+                state.currentPlayerTurn = victimIndex; 
+                showScreen('screen-game');
+                updateMainGameUI();
+            }
+        }
+
+        function cancelCatch() {
+            showScreen('screen-game');
+        }
+
+        function resetCatchState() {
+            state.catcherIndex = -1;
+            state.selectedCardIndex = -1;
+            document.getElementById('catcher-select').classList.remove('hidden-screen');
+            document.getElementById('catch-card-select').classList.add('hidden-screen');
+            document.getElementById('victim-select').classList.add('hidden-screen');
+        }
+
+        // --- UI Navigation ---
+        function showScreen(screenId) {
+            const screens = ['screen-setup', 'screen-peek', 'screen-game', 'screen-catch', 'screen-winner'];
+            screens.forEach(id => {
+                document.getElementById(id).classList.add('hidden-screen');
+            });
+            document.getElementById(screenId).classList.remove('hidden-screen');
+        }
+    </script>
+</body>
+</html>
