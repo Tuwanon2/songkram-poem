@@ -1,4 +1,3 @@
-// --- Firebase Config ---
 const firebaseConfig = {
     apiKey: "AIzaSyBSzrgXsNFBqXYqsFxbeXrrmWBcUPO1DJM",
     authDomain: "songkrampoem.firebaseapp.com",
@@ -10,11 +9,9 @@ const firebaseConfig = {
     measurementId: "G-X1SMGY912T"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ดึงรายชื่อห้องทั้งหมดมาโชว์ที่ Lobby แบบเรียลไทม์
 db.ref('rooms').on('value', (snapshot) => {
     const rooms = snapshot.val();
     renderAvailableRooms(rooms);
@@ -33,7 +30,6 @@ function renderAvailableRooms(rooms) {
     let hasWaitingRoom = false;
     Object.keys(rooms).forEach(roomCode => {
         const room = rooms[roomCode];
-        // โชว์เฉพาะห้องที่สถานะ "waiting" เท่านั้น (เกมยังไม่เริ่ม)
         if (room.status === "waiting") {
             hasWaitingRoom = true;
             const playerCount = room.players ? Object.keys(room.players).length : 0;
@@ -51,65 +47,39 @@ function renderAvailableRooms(rooms) {
     }
 }
 
-// สร้างห้องใหม่
 function createRoom() {
     const name = document.getElementById('player-name').value.trim();
     let roomCode = document.getElementById('room-code').value.trim().toUpperCase();
     
     if(!name) return alert("โปรดระบุชื่อผู้เล่นกวีก่อนครับ");
+    if(!roomCode) roomCode = Math.floor(1000 + Math.random() * 9000).toString();
 
-    // ถ้าไม่ได้ใส่รหัสห้อง ให้สุ่มเลข 4 หลัก
-    if(!roomCode) {
-        roomCode = Math.floor(1000 + Math.random() * 9000).toString();
-    }
-
-    // สร้างข้อมูลเริ่มต้นของห้องลง Firebase
     db.ref('rooms/' + roomCode).set({
         theme: "กำลังเลือกหัวข้อ...",
         status: "waiting",
         catchingState: { active: false, catcher: "" },
         winner: ""
     }).then(() => {
-        // ย้ายหน้าไปยังห้องเล่น โดยส่งตัวแปรผ่าน URL Query Params
         window.location.href = `room.html?room=${roomCode}&name=${encodeURIComponent(name)}&host=true`;
     });
 }
 
-// เข้าร่วมห้องผ่านการพิมพ์รหัส
 function joinRoom() {
     const name = document.getElementById('player-name').value.trim();
     const roomCode = document.getElementById('room-code').value.trim().toUpperCase();
     
-    if(!name || !roomCode) return alert("โปรดกรอกชื่อของคุณและรหัสห้องให้ครบถ้วน");
+    if(!name || !roomCode) return alert("โปรดกรอกชื่อของคุณและรหัสห้อง");
 
-    // ตรวจสอบว่าห้องนี้มีอยู่จริงหรือไม่
     db.ref('rooms/' + roomCode).once('value', (snapshot) => {
-        if (!snapshot.exists()) {
-            alert("ไม่พบรหัสห้องนี้ในระบบ กรุณาตรวจสอบอีกครั้ง");
-            return;
-        }
-        
-        const room = snapshot.val();
-        if (room.status === "playing") {
-            alert("ห้องนี้กำลังอยู่ในระหว่างเล่นเกม ไม่สามารถเข้าร่วมได้ในขณะนี้");
-            return;
-        }
-
-        // ย้ายหน้าไปยังห้องเล่น
+        if (!snapshot.exists()) return alert("ไม่พบรหัสห้องนี้ในระบบ");
+        if (snapshot.val().status === "playing") return alert("ห้องนี้กำลังอยู่ในระหว่างเล่นเกม");
         window.location.href = `room.html?room=${roomCode}&name=${encodeURIComponent(name)}`;
     });
 }
 
-// ทางลัดกดจากรายการห้องเพื่อเข้าร่วมทันที
 function quickJoin(roomCode) {
     const nameInput = document.getElementById('player-name');
     const name = nameInput.value.trim();
-    
-    if (!name) {
-        nameInput.focus();
-        alert("กรุณากรอกชื่อของคุณก่อนกดเข้าร่วมห้องนะกวีเอก!");
-        return;
-    }
-
+    if (!name) return alert("กรุณากรอกชื่อของคุณก่อนกดเข้าร่วมห้อง!");
     window.location.href = `room.html?room=${roomCode}&name=${encodeURIComponent(name)}`;
 }
