@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>สงครามวงกลอน 8 Online</title>
+    <title>วงกลอน ๘ Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;800&display=swap" rel="stylesheet">
     
@@ -17,6 +17,9 @@
     <style>
         body { font-family: 'Prompt', sans-serif; }
         .hidden-screen { display: none !important; }
+        /* สกอร์บาร์สำหรับ Lobby */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4 selection:bg-pink-500 relative">
@@ -31,11 +34,24 @@
             <p class="text-gray-400 text-sm mb-4">แต่งกลอนสด งดทำท่า</p>
             
             <input type="text" id="player-name" placeholder="ชื่อของคุณ" class="w-full bg-gray-700 text-white p-3 rounded-xl text-center outline-none focus:ring-2 focus:ring-pink-500">
-            <input type="text" id="room-code" placeholder="รหัสห้อง (เช่น 9999)" class="w-full bg-gray-700 text-white p-3 rounded-xl text-center outline-none font-bold uppercase focus:ring-2 focus:ring-pink-500">
+            <div class="relative">
+                <input type="text" id="room-code" placeholder="สร้างรหัสห้อง (เช่น 9999)" class="w-full bg-gray-700 text-white p-3 rounded-xl text-center outline-none font-bold uppercase focus:ring-2 focus:ring-pink-500">
+            </div>
             
             <div class="grid grid-cols-2 gap-2 pt-2">
                 <button onclick="createRoom()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:scale-105">สร้างห้อง</button>
                 <button onclick="joinRoom()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:scale-105">เข้าร่วม</button>
+            </div>
+
+            <!-- ห้องที่เปิดอยู่ (Lobby List) -->
+            <div class="mt-6 border-t border-gray-600 pt-4 text-left">
+                <h3 class="text-yellow-400 font-bold mb-3 flex items-center justify-between">
+                    <span>🚪 ห้องที่รอเริ่มเกม</span>
+                    <span class="text-xs text-gray-400 font-normal">กดเพื่อจอยเลย!</span>
+                </h3>
+                <div id="available-rooms" class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
+                    <p class="text-gray-500 text-sm text-center py-2">กำลังโหลดห้อง...</p>
+                </div>
             </div>
         </div>
 

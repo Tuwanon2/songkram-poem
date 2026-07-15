@@ -1,4 +1,4 @@
-// --- Firebase Config ของคุณ ---
+// --- Firebase Config ---
 const firebaseConfig = {
     apiKey: "AIzaSyBSzrgXsNFBqXYqsFxbeXrrmWBcUPO1DJM",
     authDomain: "songkrampoem.firebaseapp.com",
@@ -19,12 +19,10 @@ let myName = "";
 let currentRoom = "";
 let isHost = false;
 let myCardsArr = [];
-let allPlayers = {}; // เก็บรายชื่อและจำนวนไพ่
+let allPlayers = {}; 
 
-// หัวข้อกลอนแบบสั้นๆ (ห้วนๆ)
 const ALL_THEMES = ["ดอกไม้", "หุ่นไล่กา", "ทะเล", "ภูเขา", "โรงเรียน", "ผีหลอก", "ฝนตก", "ตลาดน้ำ", "ดวงดาว", "สุนัข", "แมว", "รถไฟ", "ความรัก", "ชาวนา"];
 
-// แอคชั่น
 const ALL_ACTIONS = [
     "ไอ / จาม", "หัวเราะ", "เกาหัว", "ถอนหายใจ", 
     "ขยี้ตา / จับแว่น", "ดื่มน้ำ", "จับมือถือ", 
@@ -34,6 +32,54 @@ const ALL_ACTIONS = [
 function getRandomCards(num) {
     let shuffled = [...ALL_ACTIONS].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, num);
+}
+
+// --- หน้าต่าง Lobby ---
+db.ref('rooms').on('value', (snapshot) => {
+    // โหลดห้องที่เปิดอยู่แบบเรียลไทม์
+    const rooms = snapshot.val();
+    renderAvailableRooms(rooms);
+});
+
+function renderAvailableRooms(rooms) {
+    const container = document.getElementById('available-rooms');
+    if (!container) return; // ป้องกัน error ถ้าไม่ได้อยู่หน้าแรก
+    container.innerHTML = "";
+    
+    if (!rooms) {
+        container.innerHTML = `<p class="text-gray-500 text-sm text-center py-2">ยังไม่มีห้องที่เปิดอยู่ สร้างห้องใหม่เลย!</p>`;
+        return;
+    }
+
+    let hasWaitingRoom = false;
+    Object.keys(rooms).forEach(roomCode => {
+        const room = rooms[roomCode];
+        if (room.status === "waiting") {
+            hasWaitingRoom = true;
+            const playerCount = room.players ? Object.keys(room.players).length : 0;
+            container.innerHTML += `
+                <button onclick="quickJoin('${roomCode}')" class="w-full bg-gray-700 hover:bg-pink-600 text-left p-3 rounded-lg flex justify-between items-center transition mb-2 shadow">
+                    <span class="font-bold text-white">ห้อง: <span class="text-yellow-400">${roomCode}</span></span>
+                    <span class="text-xs bg-gray-900 px-2 py-1 rounded text-pink-300">คนรอ (${playerCount})</span>
+                </button>
+            `;
+        }
+    });
+
+    if (!hasWaitingRoom) {
+        container.innerHTML = `<p class="text-gray-500 text-sm text-center py-2">ยังไม่มีห้องว่าง สร้างห้องใหม่เลย!</p>`;
+    }
+}
+
+function quickJoin(roomCode) {
+    document.getElementById('room-code').value = roomCode;
+    
+    if (!document.getElementById('player-name').value.trim()) {
+        document.getElementById('player-name').focus();
+        alert("โปรดใส่ชื่อของคุณก่อนกดเข้าร่วมห้อง");
+    } else {
+        joinRoom();
+    }
 }
 
 // --- การแสดงผลหน้าจอ ---
@@ -57,7 +103,14 @@ function hideModal() {
 function createRoom() {
     myName = document.getElementById('player-name').value.trim();
     currentRoom = document.getElementById('room-code').value.trim().toUpperCase();
-    if(!myName || !currentRoom) return alert("โปรดใส่ชื่อและรหัสห้อง");
+    
+    // ถ้าไม่ใส่รหัสห้อง ให้สุ่มเลข 4 หลัก
+    if(!currentRoom) {
+        currentRoom = Math.floor(1000 + Math.random() * 9000).toString();
+        document.getElementById('room-code').value = currentRoom;
+    }
+    
+    if(!myName) return alert("โปรดใส่ชื่อของคุณด้วย");
 
     isHost = true;
     db.ref('rooms/' + currentRoom).set({
@@ -73,6 +126,7 @@ function createRoom() {
 function joinRoom() {
     myName = document.getElementById('player-name').value.trim();
     currentRoom = document.getElementById('room-code').value.trim().toUpperCase();
+    
     if(!myName || !currentRoom) return alert("โปรดใส่ชื่อและรหัสห้อง");
     
     joinRoomLogic();
@@ -105,7 +159,7 @@ function joinRoomLogic() {
         const playerList = document.getElementById('player-list');
         playerList.innerHTML = "";
         Object.keys(allPlayers).forEach(pName => {
-            playerList.innerHTML += `<li>✅ ${pName}</li>`;
+            playerList.innerHTML += `<li class="flex items-center space-x-2"><span>✅</span> <span>${pName}</span></li>`;
         });
 
         // 2. ถ้ามีผู้ชนะ
@@ -181,7 +235,7 @@ function renderOpponentsStatus() {
         if(pName !== myName) {
             let cardCount = allPlayers[pName].cards ? allPlayers[pName].cards.length : 0;
             oppContainer.innerHTML += `
-            <span class="bg-gray-700 px-2 py-1 rounded text-pink-300">
+            <span class="bg-gray-700 px-2 py-1 rounded text-pink-300 shadow-sm border border-gray-600">
                 ${pName}: <span class="text-white">${cardCount} ใบ</span>
             </span>`;
         }
@@ -198,7 +252,7 @@ function triggerCatch() {
 }
 
 function setupCatchingUI() {
-    // โหลดรายชื่อเหยื่อ (ตัดชื่อตัวเองออก)
+    // โหลดรายชื่อเหยื่อ
     const victimSelect = document.getElementById('select-victim');
     victimSelect.innerHTML = "";
     Object.keys(allPlayers).forEach(pName => {
@@ -234,13 +288,12 @@ function confirmCatch() {
     victimCards.push(newCard);
     db.ref(`rooms/${currentRoom}/players/${victim}/cards`).set(victimCards);
 
-    // 3. ตรวจสอบว่าเราไพ่หมดชนะหรือยัง?
+    // 3. ตรวจสอบชนะ
     if(myCardsArr.length === 0) {
         db.ref('rooms/' + currentRoom).update({ winner: myName });
     }
 
-    // 4. ปิด Modal แจ้งเตือนเพื่อน
-    alert(`คุณจับโป๊ะ ${victim} สำเร็จ!\nคุณทิ้งไพ่ [${usedCard}]\n${victim} โดนจั่วเพิ่ม 1 ใบ!`);
+    alert(`ปังมาก! คุณจับโป๊ะ ${victim} สำเร็จ!\n${victim} โดนจั่วเพิ่ม 1 ใบ!`);
     
     db.ref('rooms/' + currentRoom + '/catchingState').set({
         active: false,
