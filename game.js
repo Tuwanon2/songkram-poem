@@ -26,11 +26,9 @@ let allPlayers = {};
 
 const ALL_THEMES = ["ดอกไม้", "หุ่นไล่กา", "ทะเล", "ภูเขา", "โรงเรียน", "ผีหลอก", "ฝนตก", "ตลาดน้ำ", "ดวงดาว", "สุนัข", "แมว", "ความรัก", "ชาวนา", "อวกาศ", "เงินทอง"];
 
-// คลังคำศัพท์และท่าทาง
 const ALL_WORDS = ["ต้นไม้", "กิน", "หิว", "รัก", "น้ำ", "ฟ้า", "ดิน", "ลม", "ไฟ", "เดิน", "นอน", "วิ่ง", "สวย", "รวย", "นก", "ปลา", "ดอกไม้", "หมา", "แมว", "ใจ", "ตา", "หู", "ปาก", "ดี", "ตาย", "คน"];
 const ALL_ACTIONS = ["จับมือถือ / วางมือถือ", "เกาหัว", "ถอนหายใจ", "พยักหน้า", "ส่ายหน้า", "หัวเราะ", "ไอ / จาม", "ขยี้ตา / จับแว่น", "ดื่มน้ำ", "จับคาง / กุมขมับ", "กอดอก", "ยักไหล่"];
 
-// ฟังก์ชันสร้างการ์ด (1 ใบ = 3 คำ + 1 ท่า)
 function generateCards(numCards) {
     let newCards = [];
     for (let i = 0; i < numCards; i++) {
@@ -54,7 +52,6 @@ function initRoom() {
         document.getElementById('btn-change-theme').classList.remove('hidden-screen');
     }
 
-    // จั่วไพ่เริ่มเกม 3 ใบ
     myCardsArr = generateCards(3);
 
     db.ref(`rooms/${currentRoom}/players/${myName}`).set({
@@ -71,10 +68,12 @@ function initRoom() {
             window.location.href = 'index.html';
             return;
         }
+        
+        // อัปเดตแสดงชื่อห้องให้เด่นๆ
+        document.getElementById('display-room-name').innerText = data.roomName || "ห้องกลอนลับ";
 
         allPlayers = data.players || {};
 
-        // 1. รอใน Lobby
         const playerList = document.getElementById('player-list');
         if (playerList) {
             playerList.innerHTML = "";
@@ -88,7 +87,6 @@ function initRoom() {
             });
         }
 
-        // 2. มีคนชนะ
         if(data.winner && data.winner !== "") {
             showScreen('screen-winner');
             hideModal();
@@ -96,7 +94,6 @@ function initRoom() {
             return;
         }
 
-        // 3. เกมเริ่ม
         if(data.status === "playing") {
             showScreen('screen-game');
             document.getElementById('current-theme').innerText = data.theme;
@@ -109,7 +106,6 @@ function initRoom() {
             renderMyCards();
             renderOpponentsStatus();
 
-            // 4. โหมดจับผิดเพื่อน
             if(data.catchingState && data.catchingState.active) {
                 if(data.catchingState.catcher === myName) {
                     setupCatchingUI();
@@ -155,7 +151,6 @@ function changeTheme() {
     db.ref('rooms/' + currentRoom).update({ theme: randomTheme });
 }
 
-// อัปเดต UI ไพ่ให้เห็น คำ และ ท่า ชัดเจน
 function renderMyCards() {
     const cardContainer = document.getElementById('my-cards');
     document.getElementById('my-card-count').innerText = myCardsArr.length;
@@ -192,7 +187,6 @@ function triggerCatch() {
     db.ref('rooms/' + currentRoom + '/catchingState').set({ active: true, catcher: myName });
 }
 
-// เซ็ต UI ตอนกดใช้ไพ่
 function setupCatchingUI() {
     const victimSelect = document.getElementById('select-victim');
     victimSelect.innerHTML = "";
@@ -210,24 +204,20 @@ function setupCatchingUI() {
     });
 }
 
-// ยืนยันการทิ้งไพ่ใส่เพื่อน
 function confirmCatch() {
     const victim = document.getElementById('select-victim').value;
     const cardIndex = document.getElementById('select-card').value;
     
     if(!victim || cardIndex === "") return alert("กรุณาเลือกให้ครบ");
 
-    // ทิ้งไพ่ใบที่เลือก
     myCardsArr.splice(cardIndex, 1);
     db.ref(`rooms/${currentRoom}/players/${myName}/cards`).set(myCardsArr);
 
-    // ทำโทษเพื่อนด้วยการให้จั่วเพิ่ม 1 ใบ
     let victimCards = allPlayers[victim].cards || [];
-    let newCard = generateCards(1)[0]; // สุ่มไพ่ใหม่ให้ 1 ใบ
+    let newCard = generateCards(1)[0]; 
     victimCards.push(newCard);
     db.ref(`rooms/${currentRoom}/players/${victim}/cards`).set(victimCards);
 
-    // เช็คชนะ
     if(myCardsArr.length === 0) {
         db.ref('rooms/' + currentRoom).update({ winner: myName });
     }

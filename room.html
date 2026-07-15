@@ -22,11 +22,17 @@
         
         <!-- ================= SCREEN 1: WAITING ROOM ================= -->
         <div id="screen-waiting" class="flex flex-col space-y-4">
-            <div class="flex items-center justify-between">
-                <span class="text-sm bg-purple-900/60 px-3 py-1 rounded-full text-purple-300 font-bold">ห้องกลอนสด</span>
-                <span id="host-badge" class="hidden-screen text-xs bg-yellow-500 text-gray-900 px-2 py-1 rounded font-bold">👑 Host</span>
+            
+            <div class="flex flex-col items-center justify-center gap-1">
+                <div class="flex items-center justify-center gap-2 w-full relative">
+                    <span class="text-xs bg-purple-900/60 px-3 py-1 rounded-full text-purple-300 font-bold">ชื่อห้อง</span>
+                    <span id="host-badge" class="hidden-screen absolute right-0 text-xs bg-yellow-500 text-gray-900 px-2 py-1 rounded font-bold">👑 Host</span>
+                </div>
+                <h2 id="display-room-name" class="text-3xl font-extrabold text-green-400 truncate w-full">กำลังโหลด...</h2>
+                <p class="text-gray-400 text-xs mt-1">รหัสลับไว้ชวนเพื่อน: <span id="display-room-code" class="text-white font-bold tracking-widest bg-gray-700 px-2 rounded"></span></p>
             </div>
-            <h2 class="text-3xl font-extrabold text-yellow-400">รหัสห้อง: <span id="display-room-code" class="text-white"></span></h2>
+            
+            <div class="bg-gray-700 h-[1px] w-full my-2"></div>
             
             <p class="text-gray-400 text-sm text-left">รายชื่อผู้ที่อยู่ในวงรอแต่งกลอน:</p>
             <ul id="player-list" class="bg-gray-950 rounded-2xl p-4 space-y-2 text-left font-semibold max-h-56 overflow-y-auto border border-gray-700"></ul>
@@ -58,7 +64,7 @@
             <div class="bg-gray-950 p-4 rounded-2xl border-2 border-pink-500 shadow-inner">
                 <p class="text-pink-400 text-sm font-extrabold mb-3">ไพ่ในมือคุณ (<span id="my-card-count">0</span> ใบ)</p>
                 <div id="my-cards" class="grid grid-cols-1 gap-3 mt-2">
-                    <!-- การ์ดจะถูกสร้างจาก JS ให้อ่านง่าย -->
+                    <!-- การ์ดจะถูกสร้างจาก JS -->
                 </div>
             </div>
 

@@ -33,10 +33,12 @@ function renderAvailableRooms(rooms) {
         if (room.status === "waiting") {
             hasWaitingRoom = true;
             const playerCount = room.players ? Object.keys(room.players).length : 0;
+            const displayRoomName = room.roomName || "ห้องกลอนลับ (ไม่ระบุชื่อ)"; // โชว์ชื่อห้องแทนรหัส
+            
             container.innerHTML += `
-                <button onclick="quickJoin('${roomCode}')" class="w-full bg-gray-700 hover:bg-pink-600 text-left p-3 rounded-lg flex justify-between items-center transition shadow border border-gray-600">
-                    <span class="font-bold text-white">ห้อง: <span class="text-yellow-400">${roomCode}</span></span>
-                    <span class="text-xs bg-gray-950 px-2 py-1 rounded text-pink-300 font-semibold">กวีรอร่วมวง (${playerCount} คน)</span>
+                <button onclick="quickJoin('${roomCode}')" class="w-full bg-gray-700 hover:bg-green-600 text-left p-3 rounded-lg flex justify-between items-center transition shadow border border-gray-600">
+                    <span class="font-bold text-white max-w-[65%] truncate">🏠 ${displayRoomName}</span>
+                    <span class="text-xs bg-gray-950 px-2 py-1 rounded text-green-300 font-semibold whitespace-nowrap">กวีรอ (${playerCount} คน)</span>
                 </button>
             `;
         }
@@ -49,12 +51,15 @@ function renderAvailableRooms(rooms) {
 
 function createRoom() {
     const name = document.getElementById('player-name').value.trim();
+    let roomName = document.getElementById('room-name').value.trim();
     let roomCode = document.getElementById('room-code').value.trim().toUpperCase();
     
     if(!name) return alert("โปรดระบุชื่อผู้เล่นกวีก่อนครับ");
+    if(!roomName) roomName = `วงกลอนของ ${name}`; // ถ้าไม่ใส่ชื่อห้อง ให้ใช้ชื่อคนตั้งแทน
     if(!roomCode) roomCode = Math.floor(1000 + Math.random() * 9000).toString();
 
     db.ref('rooms/' + roomCode).set({
+        roomName: roomName, // เก็บชื่อห้องลง Database
         theme: "กำลังเลือกหัวข้อ...",
         status: "waiting",
         catchingState: { active: false, catcher: "" },
@@ -68,7 +73,7 @@ function joinRoom() {
     const name = document.getElementById('player-name').value.trim();
     const roomCode = document.getElementById('room-code').value.trim().toUpperCase();
     
-    if(!name || !roomCode) return alert("โปรดกรอกชื่อของคุณและรหัสห้อง");
+    if(!name || !roomCode) return alert("โปรดกรอกชื่อของคุณและรหัสห้องให้ครบถ้วน");
 
     db.ref('rooms/' + roomCode).once('value', (snapshot) => {
         if (!snapshot.exists()) return alert("ไม่พบรหัสห้องนี้ในระบบ");
