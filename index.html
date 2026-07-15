@@ -36,10 +36,9 @@
 </head>
 <body class="text-white min-h-screen flex flex-col items-center justify-start p-4 md:p-8 selection:bg-pink-500">
 
-    <div class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 my-auto">
+    <div class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 my-auto h-full">
         
         <!-- ซ้าย: สร้างห้อง / เข้าร่วมห้อง -->
-        <!-- เพิ่ม bg-gray-900/85 และ backdrop-blur-md เพื่อทำกระจกฝ้า -->
         <div class="bg-gray-900/85 backdrop-blur-md rounded-3xl shadow-2xl p-6 flex flex-col justify-between space-y-6 border border-gray-700">
             <div>
                 <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 pb-2 text-center">
@@ -81,31 +80,55 @@
             </div>
         </div>
 
-        <!-- ขวา: กฎกติกาการเล่น -->
-        <div class="bg-gray-900/85 backdrop-blur-md rounded-3xl shadow-2xl p-6 border border-pink-500/30 flex flex-col justify-center">
-            <h2 class="text-2xl font-extrabold text-pink-400 mb-4 flex items-center gap-2">
-                📜 กติกาการเล่น
+        <!-- ขวา: กฎกติกาการเล่น (ปรับให้เลื่อนอ่านได้) -->
+        <div class="bg-gray-900/85 backdrop-blur-md rounded-3xl shadow-2xl p-6 border border-pink-500/30 flex flex-col justify-start max-h-[600px]">
+            <h2 class="text-2xl font-extrabold text-pink-400 mb-4 flex items-center gap-2 shrink-0">
+                📜 กติกาและวิธีเล่น
             </h2>
-            <div class="space-y-4 text-gray-200 text-sm leading-relaxed">
-                <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-yellow-500">
-                    <p class="font-bold text-yellow-400 mb-1">1. ไพ่เริ่มต้น</p>
-                    <p>กวีทุกคนจะได้ไพ่คนละ 3 ใบ (เป็นความลับ) ในไพ่ 1 ใบจะมี <strong>"คำศัพท์ 3 คำ"</strong> และ <strong>"แอคชั่น 1 ท่า"</strong></p>
+            
+            <div class="overflow-y-auto custom-scrollbar pr-2 space-y-5 text-gray-200 text-sm leading-relaxed pb-4">
+                
+                <!-- ส่วนกติกาหลัก -->
+                <div class="space-y-4">
+                    <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-yellow-500">
+                        <p class="font-bold text-yellow-400 mb-1">1. ไพ่เริ่มต้น</p>
+                        <p>กวีทุกคนจะได้ไพ่ 3 ใบ (เป็นความลับ) ใน 1 ใบจะมี <strong>"คำศัพท์ 3 คำ"</strong> และ <strong>"แอคชั่น 1 ท่า"</strong></p>
+                    </div>
+                    <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-pink-500">
+                        <p class="font-bold text-pink-400 mb-1">2. รันวงกลอน ๘</p>
+                        <p>แอปสุ่ม "หัวข้อ" กลางวง จากนั้นทุกคนผลัดกันแต่งกลอนต่อกันไปเรื่อยๆ ตามธรรมชาติ ไม่ต้องรอแอปจัดคิว</p>
+                    </div>
+                    <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-red-500">
+                        <p class="font-bold text-red-400 mb-1">3. จ้องจับโป๊ะ!</p>
+                        <p>ถ้าเห็นใคร <strong>พูดคำศัพท์</strong> หรือ <strong>ทำท่าทาง</strong> ตรงกับไพ่ของเรา กดใช้การ์ดแทรกวงแฉได้เลยตลอดเวลา!</p>
+                    </div>
+                    <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-green-500">
+                        <p class="font-bold text-green-400 mb-1">4. ผู้ชนะ</p>
+                        <p>ใครจับผิดเพื่อนจนทิ้งไพ่หมดมือได้ก่อน คือผู้ชนะ!</p>
+                    </div>
                 </div>
 
-                <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-pink-500">
-                    <p class="font-bold text-pink-400 mb-1">2. รันวงกลอน ๘</p>
-                    <p>ระบบจะสุ่ม "หัวข้อ" กลางวง ให้ทุกคนผลัดกันแต่งกลอนต่อกันไปเรื่อยๆ (สดับ รับ รอง ส่ง) เรียงคิวกันเองตามธรรมชาติ</p>
+                <!-- ตัวอย่างสถานการณ์ -->
+                <div class="border-t border-gray-600/50 pt-4">
+                    <h3 class="text-lg font-bold text-green-400 mb-3 flex items-center gap-2">
+                        💡 ตัวอย่างจำลองเหตุการณ์
+                    </h3>
+                    <div class="bg-black/40 p-4 rounded-xl border border-gray-700/50 space-y-3">
+                        <p class="text-[13px]"><span class="text-pink-400 font-bold">🃏 ไพ่ในมือคุณ:</span> คำศัพท์ [หิว, กิน, ต้นไม้] | ท่า [เกาหัว]</p>
+                        
+                        <div class="space-y-2.5 text-[13px]">
+                            <p class="flex gap-2"><span>1️⃣</span> <span><strong>เพื่อน (กอล์ฟ) เริ่มแต่ง:</strong> "ในคืนนี้ช่าง <span class="text-yellow-400 font-bold text-base">หิว</span> จนตาลาย"</span></p>
+                            <p class="flex gap-2"><span>2️⃣</span> <span><strong>คุณหูผึ่ง!</strong> รีบกดปุ่ม <span class="text-red-400 font-bold">🚨 ขอใช้การ์ด!!</span> แทรกทันที (ไม่ต้องรอให้กอล์ฟพูดจบ)</span></p>
+                            <p class="flex gap-2"><span>3️⃣</span> <span><strong>วงหยุดชะงัก:</strong> คุณเลือกจับผิดกอล์ฟด้วยคำว่า "หิว"</span></p>
+                            <p class="flex gap-2"><span>4️⃣</span> <span><strong>โดนลงโทษ:</strong> คุณได้ทิ้งไพ่ใบนั้น! ส่วนกอล์ฟโดนทำโทษ <strong>"จั่วไพ่เพิ่ม 1 ใบ"</strong> ทันที 😈</span></p>
+                        </div>
+
+                        <div class="bg-gray-800/50 p-2 mt-3 rounded-lg border-l-2 border-blue-400 text-gray-300 text-xs">
+                            👀 <strong>*จับผิดท่าทางก็ทำได้:</strong> ถ้าระหว่างคิดกลอนเพื่อนเผลอ <strong>เกาหัว</strong> คุณก็ชิงกดปุ่มใช้การ์ดแฉได้เหมือนกัน!
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-red-500">
-                    <p class="font-bold text-red-400 mb-1">3. จ้องจับโป๊ะ!</p>
-                    <p>ตาไว หูไว! หากได้ยินกวีคนไหน <strong>"พูดคำศัพท์"</strong> หรือ <strong>"เผลอทำท่าทาง"</strong> ที่ตรงกับไพ่ในมือเรา ให้รีบกดใช้การ์ดนั้นทันที!</p>
-                </div>
-
-                <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-green-500">
-                    <p class="font-bold text-green-400 mb-1">4. ผู้ชนะ</p>
-                    <p>ใครสามารถใช้ไพ่แฉเพื่อน และเคลียร์ไพ่หมดมือได้เป็นคนแรก ถือเป็นผู้ชนะวงกลอน!</p>
-                </div>
             </div>
         </div>
 
