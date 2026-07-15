@@ -12,36 +12,49 @@
     <script src="game.js" defer></script>
 
     <style>
-        body { font-family: 'Prompt', sans-serif; }
+        body { 
+            font-family: 'Prompt', sans-serif; 
+            background-image: url('https://f.ptcdn.info/484/087/000/stnv8i3wrpj746bm7tzg-o.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: -1;
+        }
         .hidden-screen { display: none !important; }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4 selection:bg-pink-500 relative">
+<body class="text-white min-h-screen flex flex-col items-center justify-center p-4 selection:bg-pink-500 relative">
 
-    <div id="app" class="w-full max-w-md bg-gray-800 rounded-3xl shadow-2xl p-6 text-center border border-gray-700">
+    <div id="app" class="w-full max-w-md bg-gray-900/90 backdrop-blur-md rounded-3xl shadow-2xl p-6 text-center border border-gray-600/50">
         
         <!-- ================= SCREEN 1: WAITING ROOM ================= -->
         <div id="screen-waiting" class="flex flex-col space-y-4">
             
             <div class="flex flex-col items-center justify-center gap-1">
                 <div class="flex items-center justify-center gap-2 w-full relative">
-                    <span class="text-xs bg-purple-900/60 px-3 py-1 rounded-full text-purple-300 font-bold">ชื่อห้อง</span>
-                    <span id="host-badge" class="hidden-screen absolute right-0 text-xs bg-yellow-500 text-gray-900 px-2 py-1 rounded font-bold">👑 Host</span>
+                    <span class="text-xs bg-purple-900/80 px-3 py-1 rounded-full text-purple-300 font-bold border border-purple-500/50">ชื่อห้อง</span>
+                    <span id="host-badge" class="hidden-screen absolute right-0 text-xs bg-yellow-500 text-gray-900 px-2 py-1 rounded font-bold shadow">👑 Host</span>
                 </div>
-                <h2 id="display-room-name" class="text-3xl font-extrabold text-green-400 truncate w-full">กำลังโหลด...</h2>
-                <p class="text-gray-400 text-xs mt-1">รหัสลับไว้ชวนเพื่อน: <span id="display-room-code" class="text-white font-bold tracking-widest bg-gray-700 px-2 rounded"></span></p>
+                <h2 id="display-room-name" class="text-3xl font-extrabold text-green-400 truncate w-full drop-shadow-md">กำลังโหลด...</h2>
+                <p class="text-gray-300 text-xs mt-1">รหัสลับไว้ชวนเพื่อน: <span id="display-room-code" class="text-white font-bold tracking-widest bg-gray-800 px-2 py-0.5 rounded border border-gray-600"></span></p>
             </div>
             
-            <div class="bg-gray-700 h-[1px] w-full my-2"></div>
+            <div class="bg-gray-600/50 h-[1px] w-full my-2"></div>
             
-            <p class="text-gray-400 text-sm text-left">รายชื่อผู้ที่อยู่ในวงรอแต่งกลอน:</p>
-            <ul id="player-list" class="bg-gray-950 rounded-2xl p-4 space-y-2 text-left font-semibold max-h-56 overflow-y-auto border border-gray-700"></ul>
+            <p class="text-gray-300 text-sm text-left font-semibold">รายชื่อผู้ที่อยู่ในวงรอแต่งกลอน:</p>
+            <ul id="player-list" class="bg-gray-800/60 rounded-2xl p-4 space-y-2 text-left font-semibold max-h-56 overflow-y-auto border border-gray-700/50"></ul>
             
             <div class="pt-2 flex flex-col gap-2">
-                <button id="btn-start-game" onclick="startGame()" class="w-full bg-green-600 hover:bg-green-500 text-white font-extrabold py-3.5 rounded-xl shadow-lg hidden-screen transition transform hover:scale-105">
+                <button id="btn-start-game" onclick="startGame()" class="w-full bg-green-600 hover:bg-green-500 text-white font-extrabold py-3.5 rounded-xl shadow-[0_4px_0_rgb(21,128,61)] hidden-screen transition transform hover:translate-y-1 hover:shadow-none">
                     เริ่มวงแต่งกลอน! 🚀
                 </button>
-                <button onclick="leaveRoom()" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold py-3 rounded-xl text-sm transition">
+                <button onclick="leaveRoom()" class="w-full bg-gray-700/80 hover:bg-gray-600 text-gray-200 font-bold py-3 rounded-xl text-sm transition border border-gray-600">
                     ออกไปหน้าแรก
                 </button>
             </div>
@@ -50,18 +63,18 @@
         <!-- ================= SCREEN 2: GAMEPLAY ================= -->
         <div id="screen-game" class="hidden-screen flex flex-col space-y-6">
             
-            <div class="bg-gray-750 p-5 rounded-2xl border-2 border-dashed border-gray-500 relative">
-                <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-gray-900 px-4 py-1 rounded-full font-extrabold text-xs tracking-wider">หัวข้อแต่งกลอน</span>
-                <h2 id="current-theme" class="text-3xl font-black mt-2 text-white tracking-wide">กำลังสุ่ม...</h2>
+            <div class="bg-gray-800/80 p-5 rounded-2xl border-2 border-dashed border-gray-400/50 relative">
+                <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-gray-900 px-4 py-1 rounded-full font-extrabold text-xs tracking-wider shadow">หัวข้อแต่งกลอน</span>
+                <h2 id="current-theme" class="text-3xl font-black mt-2 text-white tracking-wide drop-shadow">กำลังสุ่ม...</h2>
                 <button id="btn-change-theme" onclick="changeTheme()" class="hidden-screen mt-3 text-xs text-yellow-400 underline hover:text-yellow-300 block mx-auto">เปลี่ยนหัวข้อใหม่ (Host)</button>
             </div>
 
-            <div class="bg-gray-900/60 border border-gray-700 rounded-xl p-3">
-                <p class="text-gray-400 text-xs mb-2 font-bold text-left">สถานะไพ่ผู้เล่นอื่น:</p>
+            <div class="bg-gray-800/50 border border-gray-600/50 rounded-xl p-3">
+                <p class="text-gray-300 text-xs mb-2 font-bold text-left">สถานะไพ่ผู้เล่นอื่น:</p>
                 <div id="opponents-status" class="flex flex-wrap gap-2 justify-center text-xs"></div>
             </div>
 
-            <div class="bg-gray-950 p-4 rounded-2xl border-2 border-pink-500 shadow-inner">
+            <div class="bg-gray-950/80 p-4 rounded-2xl border-2 border-pink-500 shadow-inner">
                 <p class="text-pink-400 text-sm font-extrabold mb-3">ไพ่ในมือคุณ (<span id="my-card-count">0</span> ใบ)</p>
                 <div id="my-cards" class="grid grid-cols-1 gap-3 mt-2">
                     <!-- การ์ดจะถูกสร้างจาก JS -->
@@ -75,9 +88,9 @@
         
         <!-- ================= SCREEN 3: END GAME ================= -->
         <div id="screen-winner" class="hidden-screen flex flex-col space-y-4 py-8">
-            <h1 class="text-5xl font-black text-yellow-400 animate-bounce">🎉 ชนะแล้ว!</h1>
-            <p class="text-gray-300">กวีหูไวตาไว ทิ้งไพ่หมดมือคนแรก!</p>
-            <h2 id="winner-name" class="text-4xl font-extrabold text-white bg-pink-600 py-3 rounded-2xl shadow-lg my-4">Name</h2>
+            <h1 class="text-5xl font-black text-yellow-400 animate-bounce drop-shadow-lg">🎉 ชนะแล้ว!</h1>
+            <p class="text-gray-200">กวีหูไวตาไว ทิ้งไพ่หมดมือคนแรก!</p>
+            <h2 id="winner-name" class="text-4xl font-extrabold text-white bg-pink-600/90 py-3 rounded-2xl shadow-lg my-4 border border-pink-400">Name</h2>
             <button onclick="leaveRoom()" class="mt-6 bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 rounded-xl w-full shadow-lg transition">
                 กลับหน้าหลัก (Lobby)
             </button>
@@ -86,8 +99,8 @@
     </div>
 
     <!-- ================= MODAL: CATCHING ================= -->
-    <div id="modal-catch" class="hidden-screen fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
-        <div class="bg-gray-800 p-6 rounded-2xl w-full max-w-sm border border-red-500 flex flex-col space-y-4 shadow-2xl">
+    <div id="modal-catch" class="hidden-screen fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-900 border-2 border-red-500 p-6 rounded-2xl w-full max-w-sm flex flex-col space-y-4 shadow-2xl">
             
             <div id="catch-active" class="hidden-screen flex flex-col space-y-4 text-center">
                 <h2 class="text-2xl font-bold text-red-500 flex items-center justify-center gap-2">
@@ -96,22 +109,22 @@
                 
                 <div class="text-left">
                     <label class="text-xs text-yellow-400 font-bold mb-1 block">1. ใครคือคนที่คุณจับผิด?</label>
-                    <select id="select-victim" class="w-full bg-gray-700 p-3 rounded-xl text-white outline-none border border-gray-600 font-semibold"></select>
+                    <select id="select-victim" class="w-full bg-gray-800 p-3 rounded-xl text-white outline-none border border-gray-600 font-semibold"></select>
                 </div>
 
                 <div class="text-left">
                     <label class="text-xs text-yellow-400 font-bold mb-1 block">2. ใช้ไพ่ใบไหนจับโป๊ะ?</label>
-                    <select id="select-card" class="w-full bg-gray-700 p-3 rounded-xl text-white outline-none border border-gray-600 font-semibold"></select>
+                    <select id="select-card" class="w-full bg-gray-800 p-3 rounded-xl text-white outline-none border border-gray-600 font-semibold"></select>
                 </div>
 
-                <button onclick="confirmCatch()" class="bg-green-600 hover:bg-green-500 py-3 rounded-xl font-bold text-lg mt-2 text-white shadow-lg transition">ใช้การ์ดใบนี้!</button>
+                <button onclick="confirmCatch()" class="bg-green-600 hover:bg-green-500 py-3 rounded-xl font-bold text-lg mt-2 text-white shadow-[0_4px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-none transition">ใช้การ์ดใบนี้!</button>
                 <button onclick="cancelCatch()" class="text-gray-400 underline text-sm mt-2 hover:text-white">ยกเลิก (กดผิด)</button>
             </div>
 
             <div id="catch-passive" class="hidden-screen text-center py-6">
-                <div class="animate-pulse text-6xl mb-4">🚨</div>
+                <div class="animate-pulse text-6xl mb-4 drop-shadow-[0_0_15px_rgba(220,38,38,0.8)]">🚨</div>
                 <h2 class="text-xl font-bold text-red-400"><span id="catcher-name-display" class="text-white underline">ใครบางคน</span> กำลังใช้การ์ด!</h2>
-                <p class="text-gray-400 text-sm mt-2">หยุดแต่งกลอนแป๊บ! รอดูว่าใครจะโดนแฉ...</p>
+                <p class="text-gray-300 text-sm mt-2">หยุดแต่งกลอนแป๊บ! รอดูว่าใครจะโดนแฉ...</p>
             </div>
 
         </div>

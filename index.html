@@ -15,37 +15,52 @@
     <script src="lobby.js" defer></script>
 
     <style>
-        body { font-family: 'Prompt', sans-serif; }
+        body { 
+            font-family: 'Prompt', sans-serif; 
+            background-image: url('https://f.ptcdn.info/484/087/000/stnv8i3wrpj746bm7tzg-o.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        /* เพิ่มเลเยอร์สีดำบางๆ คลุมรูปภาพเพื่อให้ UI ลอยเด่นขึ้นมา */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.3);
+            z-index: -1;
+        }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-start p-4 md:p-8 selection:bg-pink-500">
+<body class="text-white min-h-screen flex flex-col items-center justify-start p-4 md:p-8 selection:bg-pink-500">
 
     <div class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 my-auto">
         
         <!-- ซ้าย: สร้างห้อง / เข้าร่วมห้อง -->
-        <div class="bg-gray-800 rounded-3xl shadow-2xl p-6 flex flex-col justify-between space-y-6 border border-gray-700">
+        <!-- เพิ่ม bg-gray-900/85 และ backdrop-blur-md เพื่อทำกระจกฝ้า -->
+        <div class="bg-gray-900/85 backdrop-blur-md rounded-3xl shadow-2xl p-6 flex flex-col justify-between space-y-6 border border-gray-700">
             <div>
                 <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 pb-2 text-center">
                     วงกลอน ๘
                 </h1>
-                <p class="text-gray-400 text-sm text-center mb-6">ปาร์ตี้กวี จับโป๊ะคำและท่าทาง</p>
+                <p class="text-gray-300 text-sm text-center mb-6">ปาร์ตี้กวี จับโป๊ะคำและท่าทาง</p>
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="text-xs text-gray-400 block mb-1 font-semibold">ชื่อของคุณ</label>
-                        <input type="text" id="player-name" placeholder="ระบุชื่อกวี..." class="w-full bg-gray-700 text-white p-3 rounded-xl text-center outline-none focus:ring-2 focus:ring-pink-500 font-semibold">
+                        <label class="text-xs text-gray-300 block mb-1 font-semibold">ชื่อของคุณ</label>
+                        <input type="text" id="player-name" placeholder="ระบุชื่อกวี..." class="w-full bg-gray-800/80 text-white p-3 rounded-xl text-center outline-none focus:ring-2 focus:ring-pink-500 font-semibold border border-gray-600">
                     </div>
                     
-                    <div class="pt-2 border-t border-gray-700">
+                    <div class="pt-2 border-t border-gray-600/50">
                         <label class="text-xs text-green-400 block mb-1 font-semibold">ชื่อห้อง (โชว์ให้คนอื่นเห็นในหน้าแรก)</label>
-                        <input type="text" id="room-name" placeholder="เช่น วงกลอนคนเหงา..." class="w-full bg-gray-700 text-white p-3 rounded-xl text-center outline-none focus:ring-2 focus:ring-green-500 font-semibold mb-3">
+                        <input type="text" id="room-name" placeholder="เช่น วงกลอนคนเหงา..." class="w-full bg-gray-800/80 text-white p-3 rounded-xl text-center outline-none focus:ring-2 focus:ring-green-500 font-semibold mb-3 border border-gray-600">
                     </div>
 
                     <div>
                         <label class="text-xs text-red-400 block mb-1 font-semibold">รหัสห้อง (ความลับสุดยอด / ไว้ใช้ชวนเพื่อน)</label>
-                        <input type="text" id="room-code" placeholder="สุ่มอัตโนมัติถ้าปล่อยว่าง" class="w-full bg-gray-700 text-white p-3 rounded-xl text-center outline-none font-bold uppercase focus:ring-2 focus:ring-red-500 tracking-widest">
+                        <input type="text" id="room-code" placeholder="สุ่มอัตโนมัติถ้าปล่อยว่าง" class="w-full bg-gray-800/80 text-white p-3 rounded-xl text-center outline-none font-bold uppercase focus:ring-2 focus:ring-red-500 tracking-widest border border-gray-600">
                     </div>
                 </div>
                 
@@ -55,39 +70,39 @@
                 </div>
             </div>
 
-            <!-- รายชื่อห้องที่กำลังรอคน (ซ่อนรหัส โชว์แต่ชื่อ) -->
-            <div class="border-t border-gray-700 pt-4">
+            <!-- รายชื่อห้องที่กำลังรอคน -->
+            <div class="border-t border-gray-600/50 pt-4">
                 <h3 class="text-yellow-400 font-bold mb-3 flex items-center justify-between text-sm">
                     <span>🚪 ห้องที่กำลังรอเพื่อนร่วมวง</span>
                 </h3>
                 <div id="available-rooms" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-                    <p class="text-gray-500 text-sm text-center py-4">กำลังค้นหาห้องว่าง...</p>
+                    <p class="text-gray-400 text-sm text-center py-4">กำลังค้นหาห้องว่าง...</p>
                 </div>
             </div>
         </div>
 
         <!-- ขวา: กฎกติกาการเล่น -->
-        <div class="bg-gray-800 rounded-3xl shadow-2xl p-6 border border-pink-500/30 flex flex-col justify-center">
+        <div class="bg-gray-900/85 backdrop-blur-md rounded-3xl shadow-2xl p-6 border border-pink-500/30 flex flex-col justify-center">
             <h2 class="text-2xl font-extrabold text-pink-400 mb-4 flex items-center gap-2">
                 📜 กติกาการเล่น
             </h2>
-            <div class="space-y-4 text-gray-300 text-sm leading-relaxed">
-                <div class="bg-gray-900/50 p-3 rounded-xl border-l-4 border-yellow-500">
+            <div class="space-y-4 text-gray-200 text-sm leading-relaxed">
+                <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-yellow-500">
                     <p class="font-bold text-yellow-400 mb-1">1. ไพ่เริ่มต้น</p>
                     <p>กวีทุกคนจะได้ไพ่คนละ 3 ใบ (เป็นความลับ) ในไพ่ 1 ใบจะมี <strong>"คำศัพท์ 3 คำ"</strong> และ <strong>"แอคชั่น 1 ท่า"</strong></p>
                 </div>
 
-                <div class="bg-gray-900/50 p-3 rounded-xl border-l-4 border-pink-500">
+                <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-pink-500">
                     <p class="font-bold text-pink-400 mb-1">2. รันวงกลอน ๘</p>
                     <p>ระบบจะสุ่ม "หัวข้อ" กลางวง ให้ทุกคนผลัดกันแต่งกลอนต่อกันไปเรื่อยๆ (สดับ รับ รอง ส่ง) เรียงคิวกันเองตามธรรมชาติ</p>
                 </div>
 
-                <div class="bg-gray-900/50 p-3 rounded-xl border-l-4 border-red-500">
+                <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-red-500">
                     <p class="font-bold text-red-400 mb-1">3. จ้องจับโป๊ะ!</p>
                     <p>ตาไว หูไว! หากได้ยินกวีคนไหน <strong>"พูดคำศัพท์"</strong> หรือ <strong>"เผลอทำท่าทาง"</strong> ที่ตรงกับไพ่ในมือเรา ให้รีบกดใช้การ์ดนั้นทันที!</p>
                 </div>
 
-                <div class="bg-gray-900/50 p-3 rounded-xl border-l-4 border-green-500">
+                <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-green-500">
                     <p class="font-bold text-green-400 mb-1">4. ผู้ชนะ</p>
                     <p>ใครสามารถใช้ไพ่แฉเพื่อน และเคลียร์ไพ่หมดมือได้เป็นคนแรก ถือเป็นผู้ชนะวงกลอน!</p>
                 </div>
