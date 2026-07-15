@@ -11,211 +11,115 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
+    <!-- ไฟล์สคริปต์ของเรา -->
+    <script src="app.js" defer></script>
+
     <style>
         body { font-family: 'Prompt', sans-serif; }
         .hidden-screen { display: none !important; }
     </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4 selection:bg-pink-500">
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4 selection:bg-pink-500 relative">
 
     <div id="app" class="w-full max-w-md bg-gray-800 rounded-3xl shadow-2xl p-6 text-center">
         
-        <!-- ================= SCREEN: LOBBY ================= -->
+        <!-- ================= SCREEN 1: LOBBY ================= -->
         <div id="screen-lobby" class="flex flex-col space-y-4">
-            <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 pb-2">
-                สงครามวงกลอน 8
+            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 pb-2">
+                วงกลอน ๘
             </h1>
-            <p class="text-gray-400 text-sm">โหมดออนไลน์ (มือถือคนละเครื่อง)</p>
+            <p class="text-gray-400 text-sm mb-4">แต่งกลอนสด งดทำท่า</p>
             
             <input type="text" id="player-name" placeholder="ชื่อของคุณ" class="w-full bg-gray-700 text-white p-3 rounded-xl text-center outline-none focus:ring-2 focus:ring-pink-500">
-            <input type="text" id="room-code" placeholder="รหัสห้อง (เช่น 1234)" class="w-full bg-gray-700 text-white p-3 rounded-xl text-center outline-none font-bold uppercase focus:ring-2 focus:ring-pink-500">
+            <input type="text" id="room-code" placeholder="รหัสห้อง (เช่น 9999)" class="w-full bg-gray-700 text-white p-3 rounded-xl text-center outline-none font-bold uppercase focus:ring-2 focus:ring-pink-500">
             
             <div class="grid grid-cols-2 gap-2 pt-2">
-                <button onclick="createRoom()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:scale-105">สร้างห้องใหม่</button>
-                <button onclick="joinRoom()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:scale-105">เข้าร่วมห้อง</button>
+                <button onclick="createRoom()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:scale-105">สร้างห้อง</button>
+                <button onclick="joinRoom()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:scale-105">เข้าร่วม</button>
             </div>
         </div>
 
-        <!-- ================= SCREEN: WAITING ROOM ================= -->
+        <!-- ================= SCREEN 2: WAITING ROOM ================= -->
         <div id="screen-waiting" class="hidden-screen flex flex-col space-y-4">
             <h2 class="text-2xl font-bold text-yellow-400">รหัสห้อง: <span id="display-room-code" class="text-white"></span></h2>
-            <p class="text-gray-300">รอเพื่อนเข้ามาให้ครบ...</p>
-            <ul id="player-list" class="bg-gray-700 rounded-xl p-4 space-y-2 text-left font-semibold">
-                <!-- รายชื่อผู้เล่นจะมาโผล่ตรงนี้ -->
+            <p class="text-gray-300 text-sm">รายชื่อกวีในวง:</p>
+            <ul id="player-list" class="bg-gray-700 rounded-xl p-4 space-y-2 text-left font-semibold max-h-48 overflow-y-auto">
+                <!-- รายชื่อผู้เล่น -->
             </ul>
             <button id="btn-start-game" onclick="startGame()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl shadow-lg hidden-screen transition transform hover:scale-105">
-                เริ่มเกม!
+                เริ่มแต่งกลอน!
             </button>
         </div>
 
-        <!-- ================= SCREEN: GAMEPLAY ================= -->
+        <!-- ================= SCREEN 3: GAMEPLAY ================= -->
         <div id="screen-game" class="hidden-screen flex flex-col space-y-6">
-            <div class="bg-gray-700 p-4 rounded-xl border border-dashed border-gray-500 relative">
-                <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-gray-900 px-3 py-1 rounded-full font-bold text-xs">ธีมรอบนี้</span>
-                <h2 id="current-theme" class="text-2xl font-bold mt-2 text-white">กำลังสุ่ม...</h2>
+            <div class="bg-gray-700 p-4 rounded-xl border border-dashed border-gray-400 relative">
+                <span class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-gray-900 px-3 py-1 rounded-full font-bold text-xs">หัวข้อกลอน</span>
+                <h2 id="current-theme" class="text-3xl font-bold mt-2 text-white">กำลังสุ่ม...</h2>
+                <button id="btn-change-theme" onclick="changeTheme()" class="hidden-screen mt-3 text-xs text-yellow-400 underline hover:text-yellow-300">เปลี่ยนหัวข้อ (เฉพาะ Host)</button>
             </div>
 
-            <div class="bg-gray-900 p-4 rounded-xl border-2 border-pink-500 shadow-inner">
-                <p class="text-pink-400 text-sm font-bold mb-2">ไพ่ในมือคุณ (แอบดูไว้!)</p>
-                <div id="my-cards" class="grid grid-cols-1 gap-3 mt-2">
-                    <!-- ไพ่ของคุณจะมาโผล่ตรงนี้ -->
+            <!-- กล่องสถานะเพื่อน -->
+            <div class="bg-gray-800 border border-gray-600 rounded-xl p-3">
+                <p class="text-gray-400 text-xs mb-2">จำนวนไพ่ของเพื่อน:</p>
+                <div id="opponents-status" class="flex flex-wrap gap-2 justify-center text-sm">
+                    <!-- สถานะไพ่เพื่อน -->
                 </div>
             </div>
 
-            <button onclick="slapCard()" class="w-full bg-red-600 hover:bg-red-500 text-white font-extrabold py-5 rounded-2xl text-2xl shadow-[0_8px_0_rgb(153,27,27)] active:translate-y-2 active:shadow-none transition-all">
-                🚨 ตบไพ่จับโป๊ะ! 🚨
+            <div class="bg-gray-900 p-4 rounded-xl border-2 border-pink-500 shadow-inner">
+                <p class="text-pink-400 text-sm font-bold mb-2">ไพ่ของคุณ (<span id="my-card-count">0</span> ใบ)</p>
+                <div id="my-cards" class="grid grid-cols-1 gap-2 mt-2">
+                    <!-- ไพ่ของคุณ -->
+                </div>
+            </div>
+
+            <button onclick="triggerCatch()" class="w-full bg-red-600 hover:bg-red-500 text-white font-extrabold py-5 rounded-2xl text-2xl shadow-[0_8px_0_rgb(153,27,27)] active:translate-y-2 active:shadow-none transition-all">
+                🚨 จับโป๊ะเพื่อน! 🚨
             </button>
-            <p class="text-xs text-gray-400">เมื่อมีคนกดตบไพ่ ระบบจะแจ้งเตือนทุกคนในห้อง</p>
+        </div>
+        
+        <!-- ================= SCREEN 4: END GAME ================= -->
+        <div id="screen-winner" class="hidden-screen flex flex-col space-y-4 py-8">
+            <h1 class="text-5xl font-bold text-yellow-400">🎉 จบเกม!</h1>
+            <p class="text-lg">ผู้ชนะคือกวีเอก:</p>
+            <h2 id="winner-name" class="text-4xl font-extrabold text-white">Name</h2>
+            <button onclick="location.reload()" class="mt-6 bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 rounded-xl w-full">กลับหน้าแรก</button>
         </div>
 
     </div>
 
-    <script>
-        // --- Firebase Config ของคุณ ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBSzrgXsNFBqXYqsFxbeXrrmWBcUPO1DJM",
-            authDomain: "songkrampoem.firebaseapp.com",
-            databaseURL: "https://songkrampoem-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "songkrampoem",
-            storageBucket: "songkrampoem.firebasestorage.app",
-            messagingSenderId: "578018297847",
-            appId: "1:578018297847:web:e8efabae61aaf98a6210f2",
-            measurementId: "G-X1SMGY912T"
-        };
-        
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        
-        let myName = "";
-        let currentRoom = "";
-        let isHost = false;
-
-        const ALL_ACTIONS = [
-            "ไอ หรือ จาม", "หัวเราะเสียงดัง", "จับผม หรือ เกาหัว", "ถอนหายใจ", 
-            "พูดคำหยาบ", "ขยับแว่น หรือ ขยี้ตา", "ดื่มน้ำ", "หยิบ/จับมือถือ", 
-            "ยักไหล่", "ส่ายหน้า", "พยักหน้า", "ปรบมือ", "ชี้หน้าคนอื่น"
-        ];
-
-        function getRandomCards(num) {
-            let shuffled = [...ALL_ACTIONS].sort(() => 0.5 - Math.random());
-            return shuffled.slice(0, num);
-        }
-
-        // --- UI Functions ---
-        function showScreen(id) {
-            document.querySelectorAll('div[id^="screen-"]').forEach(el => el.classList.add('hidden-screen'));
-            document.getElementById(id).classList.remove('hidden-screen');
-        }
-
-        // --- Multiplayer Logic ---
-        function createRoom() {
-            myName = document.getElementById('player-name').value.trim();
-            currentRoom = document.getElementById('room-code').value.trim().toUpperCase();
-            if(!myName || !currentRoom) return alert("โปรดใส่ชื่อและรหัสห้อง");
-
-            isHost = true;
-            db.ref('rooms/' + currentRoom).set({
-                theme: "รอเริ่มเกม...",
-                status: "waiting",
-                alert: ""
-            });
+    <!-- ================= MODAL: CATCHING (ใครตบไพ่?) ================= -->
+    <div id="modal-catch" class="hidden-screen fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 p-6 rounded-2xl w-full max-w-sm border border-red-500 flex flex-col space-y-4">
             
-            joinRoomLogic();
-        }
+            <!-- กรณีเราเป็นคนตบไพ่ -->
+            <div id="catch-active" class="hidden-screen flex flex-col space-y-4 text-center">
+                <h2 class="text-2xl font-bold text-red-500">คุณตบไพ่จับโป๊ะ!</h2>
+                
+                <div class="text-left">
+                    <p class="text-sm text-yellow-400 mb-1">1. ใครเป็นคนทำท่า?</p>
+                    <select id="select-victim" class="w-full bg-gray-700 p-2 rounded text-white outline-none"></select>
+                </div>
 
-        function joinRoom() {
-            myName = document.getElementById('player-name').value.trim();
-            currentRoom = document.getElementById('room-code').value.trim().toUpperCase();
-            if(!myName || !currentRoom) return alert("โปรดใส่ชื่อและรหัสห้อง");
-            
-            joinRoomLogic();
-        }
+                <div class="text-left">
+                    <p class="text-sm text-yellow-400 mb-1">2. คุณใช้ไพ่ใบไหนจับ?</p>
+                    <select id="select-card" class="w-full bg-gray-700 p-2 rounded text-white outline-none"></select>
+                </div>
 
-        function joinRoomLogic() {
-            // สุ่มไพ่ 3 ใบให้ตัวเองตอนเข้าห้อง
-            let myStartingCards = getRandomCards(3);
+                <button onclick="confirmCatch()" class="bg-green-600 hover:bg-green-500 py-3 rounded-xl font-bold text-lg mt-2 text-white shadow-lg">ยืนยันการจับโป๊ะ</button>
+                <button onclick="cancelCatch()" class="text-gray-400 underline text-sm mt-2">ยกเลิก (กดผิด)</button>
+            </div>
 
-            db.ref('rooms/' + currentRoom + '/players/' + myName).set({
-                name: myName,
-                cards: myStartingCards
-            });
+            <!-- กรณีคนอื่นตบไพ่ (เรานั่งดู) -->
+            <div id="catch-passive" class="hidden-screen text-center py-6">
+                <div class="animate-pulse text-6xl mb-4">🚨</div>
+                <h2 class="text-xl font-bold text-red-400"><span id="catcher-name-display">ใครบางคน</span> กำลังจับโป๊ะ!</h2>
+                <p class="text-gray-400 text-sm mt-2">โปรดรอให้เขายืนยัน...</p>
+            </div>
 
-            document.getElementById('display-room-code').innerText = currentRoom;
-            showScreen('screen-waiting');
+        </div>
+    </div>
 
-            if(isHost) {
-                document.getElementById('btn-start-game').classList.remove('hidden-screen');
-            }
-
-            // ฟังการเปลี่ยนแปลงในห้อง (Real-time Sync)
-            db.ref('rooms/' + currentRoom).on('value', (snapshot) => {
-                const data = snapshot.val();
-                if(!data) return;
-
-                // อัปเดตรายชื่อคนรอ
-                const playerList = document.getElementById('player-list');
-                playerList.innerHTML = "";
-                if(data.players) {
-                    Object.keys(data.players).forEach(pName => {
-                        playerList.innerHTML += `<li class="flex items-center space-x-2"><span>✅</span> <span>${pName}</span></li>`;
-                    });
-                }
-
-                // ถ้า Host กดเริ่มเกม
-                if(data.status === "playing") {
-                    showScreen('screen-game');
-                    document.getElementById('current-theme').innerText = data.theme;
-                    if(data.players && data.players[myName]) {
-                        renderMyCards(data.players[myName].cards);
-                    }
-                }
-
-                // แจ้งเตือนเมื่อมีคนตบไพ่
-                if(data.alert && data.alert !== "") {
-                    alert(data.alert);
-                    // รีเซ็ต alert กลับเป็นค่าว่างเพื่อไม่ให้เด้งซ้ำ (เฉพาะ Host เป็นคนเคลียร์)
-                    if(isHost) {
-                        setTimeout(() => {
-                            db.ref('rooms/' + currentRoom).update({ alert: "" });
-                        }, 2000);
-                    }
-                }
-            });
-        }
-
-        function startGame() {
-            const themes = [
-                "อกหักรักคุด", "วันเงินเดือนออก", "หมูกระทะเยียวยาทุกสิ่ง", 
-                "เพื่อนซี้ผีบ้า", "ทริปเที่ยวทะเล", "มนุษย์ออฟฟิศ"
-            ];
-            const randomTheme = themes[Math.floor(Math.random() * themes.length)];
-            
-            db.ref('rooms/' + currentRoom).update({
-                theme: randomTheme,
-                status: "playing"
-            });
-        }
-
-        function renderMyCards(cards) {
-            const cardContainer = document.getElementById('my-cards');
-            cardContainer.innerHTML = "";
-            if(!cards) return;
-            
-            cards.forEach(card => {
-                cardContainer.innerHTML += `
-                <div class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 p-4 rounded-xl font-bold shadow-md border border-purple-400 text-center text-lg">
-                    ${card}
-                </div>`;
-            });
-        }
-
-        function slapCard() {
-            // ส่งข้อมูลแจ้งเตือนไปยัง Firebase ให้ทุกคนในห้องเห็น
-            db.ref('rooms/' + currentRoom).update({
-                alert: `🚨 หยุดกลอนเดี๋ยวนี้! [${myName}] ตบไพ่จับโป๊ะ! 🚨`
-            });
-        }
-    </script>
 </body>
 </html>
