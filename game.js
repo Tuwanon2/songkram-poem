@@ -151,20 +151,60 @@ function changeTheme() {
     db.ref('rooms/' + currentRoom).update({ theme: randomTheme });
 }
 
+// 🎨 อัปเดตฟังก์ชันนี้ ให้วาดการ์ดตามที่คุณต้องการ
 function renderMyCards() {
     const cardContainer = document.getElementById('my-cards');
-    document.getElementById('my-card-count').innerText = myCardsArr.length;
+    const countSpan = document.getElementById('my-card-count');
+    
+    // ถ้าไพ่หมดมือ ให้แสดงข้อความชนะ
+    if (!myCardsArr || myCardsArr.length === 0) {
+        countSpan.innerText = "0";
+        cardContainer.innerHTML = `
+            <div class="h-full flex items-center justify-center text-center">
+                <p class="text-gray-400 text-xl font-bold py-10">คุณไม่มีไพ่ในมือแล้ว! 🏆<br>รอฉลองชัยชนะได้เลย</p>
+            </div>`;
+        return;
+    }
+
+    countSpan.innerText = myCardsArr.length;
     cardContainer.innerHTML = "";
     
     myCardsArr.forEach((card, idx) => {
-        const wordsStr = card.words.join(", ");
+        const w1 = card.words[0] || "-";
+        const w2 = card.words[1] || "-";
+        const w3 = card.words[2] || "-";
+        const action = card.action || "-";
+
         cardContainer.innerHTML += `
-        <div class="bg-gradient-to-r from-gray-800 to-gray-700 p-4 rounded-xl shadow-lg border border-gray-600 text-left relative">
-            <div class="text-green-400 text-xs font-bold mb-1">💬 หากมีคนพูดคำว่า:</div>
-            <div class="text-white font-extrabold text-base mb-3">${wordsStr}</div>
-            <div class="text-yellow-400 text-xs font-bold mb-1">🎬 หรือทำท่าทาง:</div>
-            <div class="text-white font-extrabold text-base">${card.action}</div>
-        </div>`;
+            <div class="bg-white rounded-[20px] overflow-hidden shadow-lg border-4 border-[#e53935] w-full mt-2">
+                
+                <!-- ครึ่งบน: คำศัพท์ (2 คำบน, 1 คำล่าง) -->
+                <div class="p-5 flex flex-col items-center gap-3 border-b-4 border-[#e53935] bg-white">
+                    <!-- แถวบน 2 คำ -->
+                    <div class="flex gap-3 w-full">
+                        <div class="flex-1 border-[3px] border-[#0ea5e9] rounded-xl py-3 px-2 text-center bg-white">
+                            <span class="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">${w1}</span>
+                        </div>
+                        <div class="flex-1 border-[3px] border-[#0ea5e9] rounded-xl py-3 px-2 text-center bg-white">
+                            <span class="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">${w2}</span>
+                        </div>
+                    </div>
+                    <!-- แถวล่าง 1 คำ ตรงกลาง -->
+                    <div class="border-[3px] border-[#0ea5e9] rounded-xl py-3 px-8 text-center bg-white w-[75%] mt-1">
+                        <span class="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">${w3}</span>
+                    </div>
+                </div>
+
+                <!-- ครึ่งล่าง: ท่าทาง -->
+                <div class="p-5 bg-white">
+                    <div class="border-[3px] border-[#0ea5e9] rounded-xl p-5 text-center bg-white">
+                        <p class="text-gray-600 font-semibold text-lg mb-1">หากมีผู้เล่นคนไหน</p>
+                        <p class="text-2xl md:text-3xl font-black text-gray-900 leading-snug">${action}</p>
+                    </div>
+                </div>
+
+            </div>
+        `;
     });
 }
 
@@ -199,7 +239,7 @@ function setupCatchingUI() {
     const cardSelect = document.getElementById('select-card');
     cardSelect.innerHTML = "";
     myCardsArr.forEach((card, index) => {
-        let previewText = `ใช้คำ: [${card.words.join(", ")}] หรือ ท่า: [${card.action}]`;
+        let previewText = `คำ: [${card.words.join(", ")}] หรือ ท่า: [${card.action}]`;
         cardSelect.innerHTML += `<option value="${index}">${previewText}</option>`;
     });
 }
