@@ -22,7 +22,6 @@
             background-position: center;
             background-attachment: fixed;
         }
-        /* เพิ่มเลเยอร์สีดำบางๆ คลุมรูปภาพเพื่อให้ UI ลอยเด่นขึ้นมา */
         body::before {
             content: "";
             position: fixed;
@@ -32,107 +31,153 @@
         }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 10px; }
+        .hidden-modal { display: none !important; }
     </style>
 </head>
-<body class="text-white min-h-screen flex flex-col items-center justify-start p-4 md:p-8 selection:bg-pink-500">
+<body class="text-white min-h-screen flex flex-col items-center justify-center p-4 md:p-8 selection:bg-pink-500 relative">
 
-    <div class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 my-auto h-full">
-        
-        <!-- ซ้าย: สร้างห้อง / เข้าร่วมห้อง -->
-        <div class="bg-gray-900/85 backdrop-blur-md rounded-3xl shadow-2xl p-6 flex flex-col justify-between space-y-6 border border-gray-700">
-            <div>
-                <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 pb-2 text-center">
-                    วงกลอน ๘
-                </h1>
-                <p class="text-gray-300 text-sm text-center mb-6">ปาร์ตี้กวี จับโป๊ะคำและท่าทาง</p>
-                
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs text-gray-300 block mb-1 font-semibold">ชื่อของคุณ</label>
-                        <input type="text" id="player-name" placeholder="ระบุชื่อกวี..." class="w-full bg-gray-800/80 text-white p-3 rounded-xl text-center outline-none focus:ring-2 focus:ring-pink-500 font-semibold border border-gray-600">
-                    </div>
-                    
-                    <div class="pt-2 border-t border-gray-600/50">
-                        <label class="text-xs text-green-400 block mb-1 font-semibold">ชื่อห้อง (โชว์ให้คนอื่นเห็นในหน้าแรก)</label>
-                        <input type="text" id="room-name" placeholder="เช่น วงกลอนคนเหงา..." class="w-full bg-gray-800/80 text-white p-3 rounded-xl text-center outline-none focus:ring-2 focus:ring-green-500 font-semibold mb-3 border border-gray-600">
-                    </div>
+    <!-- ปุ่มเปิดวิธีเล่น (มุมขวาบน) -->
+    <button onclick="toggleRulesModal(true)" class="absolute top-4 right-4 bg-pink-600/90 hover:bg-pink-500 text-white font-bold py-2 px-4 rounded-full shadow-lg backdrop-blur-sm border border-pink-400 transition transform hover:scale-105 z-10 flex items-center gap-2">
+        <span>❓</span> วิธีเล่น
+    </button>
 
-                    <div>
-                        <label class="text-xs text-red-400 block mb-1 font-semibold">รหัสห้อง (ความลับสุดยอด / ไว้ใช้ชวนเพื่อน)</label>
-                        <input type="text" id="room-code" placeholder="สุ่มอัตโนมัติถ้าปล่อยว่าง" class="w-full bg-gray-800/80 text-white p-3 rounded-xl text-center outline-none font-bold uppercase focus:ring-2 focus:ring-red-500 tracking-widest border border-gray-600">
-                    </div>
+    <!-- ตรงกลาง: สร้างห้อง / เข้าร่วมห้อง -->
+    <div class="w-full max-w-md bg-gray-900/85 backdrop-blur-md rounded-3xl shadow-2xl p-6 flex flex-col space-y-6 border border-gray-700 mt-10">
+        <div>
+            <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 pb-2 text-center drop-shadow-md">
+                วงกลอน ๘
+            </h1>
+            <p class="text-gray-300 text-sm text-center mb-6">ปาร์ตี้กวี จับโป๊ะคำและท่าทาง</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs text-gray-300 block mb-1 font-semibold">ชื่อของคุณ</label>
+                    <input type="text" id="player-name" placeholder="ระบุชื่อกวี..." class="w-full bg-gray-800/80 text-white p-3 rounded-xl text-center outline-none focus:ring-2 focus:ring-pink-500 font-semibold border border-gray-600 shadow-inner">
                 </div>
                 
-                <div class="grid grid-cols-2 gap-3 pt-4">
-                    <button onclick="createRoom()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:scale-105">สร้างห้อง</button>
-                    <button onclick="joinRoom()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl shadow-lg transition transform hover:scale-105">เข้าร่วมด้วยรหัส</button>
+                <div class="pt-2 border-t border-gray-600/50">
+                    <label class="text-xs text-green-400 block mb-1 font-semibold">ชื่อห้อง (โชว์ในหน้าแรก)</label>
+                    <input type="text" id="room-name" placeholder="เช่น วงกลอนคนเหงา..." class="w-full bg-gray-800/80 text-white p-3 rounded-xl text-center outline-none focus:ring-2 focus:ring-green-500 font-semibold mb-3 border border-gray-600 shadow-inner">
+                </div>
+
+                <div>
+                    <label class="text-xs text-red-400 block mb-1 font-semibold">รหัสห้อง (ความลับ / ไว้ชวนเพื่อน)</label>
+                    <input type="text" id="room-code" placeholder="สุ่มอัตโนมัติถ้าปล่อยว่าง" class="w-full bg-gray-800/80 text-white p-3 rounded-xl text-center outline-none font-bold uppercase focus:ring-2 focus:ring-red-500 tracking-widest border border-gray-600 shadow-inner">
                 </div>
             </div>
-
-            <!-- รายชื่อห้องที่กำลังรอคน -->
-            <div class="border-t border-gray-600/50 pt-4">
-                <h3 class="text-yellow-400 font-bold mb-3 flex items-center justify-between text-sm">
-                    <span>🚪 ห้องที่กำลังรอเพื่อนร่วมวง</span>
-                </h3>
-                <div id="available-rooms" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-                    <p class="text-gray-400 text-sm text-center py-4">กำลังค้นหาห้องว่าง...</p>
-                </div>
+            
+            <div class="grid grid-cols-2 gap-3 pt-5">
+                <button onclick="createRoom()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition transform active:scale-95 border border-purple-400/50">สร้างห้อง</button>
+                <button onclick="joinRoom()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition transform active:scale-95 border border-blue-400/50">เข้าร่วมด้วยรหัส</button>
             </div>
         </div>
 
-        <!-- ขวา: กฎกติกาการเล่น (ปรับให้เลื่อนอ่านได้) -->
-        <div class="bg-gray-900/85 backdrop-blur-md rounded-3xl shadow-2xl p-6 border border-pink-500/30 flex flex-col justify-start max-h-[600px]">
+        <!-- รายชื่อห้องที่กำลังรอคน -->
+        <div class="border-t border-gray-600/50 pt-4">
+            <h3 class="text-yellow-400 font-bold mb-3 flex items-center justify-between text-sm">
+                <span>🚪 ห้องที่กำลังรอเพื่อนร่วมวง</span>
+            </h3>
+            <div id="available-rooms" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
+                <p class="text-gray-400 text-sm text-center py-4">กำลังค้นหาห้องว่าง...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: วิธีเล่น ================= -->
+    <div id="modal-rules" class="hidden-modal fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-900 border border-pink-500/50 p-6 rounded-2xl w-full max-w-2xl shadow-2xl relative flex flex-col max-h-[90vh]">
+            
+            <!-- ปุ่มปิดมุมขวาบน -->
+            <button onclick="toggleRulesModal(false)" class="absolute top-4 right-4 text-gray-400 hover:text-white transition text-2xl font-bold">
+                &times;
+            </button>
+
             <h2 class="text-2xl font-extrabold text-pink-400 mb-4 flex items-center gap-2 shrink-0">
                 📜 กติกาและวิธีเล่น
             </h2>
             
-            <div class="overflow-y-auto custom-scrollbar pr-2 space-y-5 text-gray-200 text-sm leading-relaxed pb-4">
+            <!-- เนื้อหาที่เลื่อนได้ -->
+            <div class="overflow-y-auto custom-scrollbar pr-2 space-y-6 text-gray-200 text-sm leading-relaxed pb-4">
                 
                 <!-- ส่วนกติกาหลัก -->
-                <div class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-yellow-500">
-                        <p class="font-bold text-yellow-400 mb-1">1. ไพ่เริ่มต้น</p>
-                        <p>กวีทุกคนจะได้ไพ่ 3 ใบ (เป็นความลับ) ใน 1 ใบจะมี <strong>"คำศัพท์ 3 คำ"</strong> และ <strong>"แอคชั่น 1 ท่า"</strong></p>
+                        <p class="font-bold text-yellow-400 mb-1">1. ไพ่ในมือ</p>
+                        <p>ทุกคนจะได้ไพ่คนละ 3 ใบ (1 ใบมีคำศัพท์ 3 คำ + ท่าทาง 1 ท่า)</p>
                     </div>
                     <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-pink-500">
-                        <p class="font-bold text-pink-400 mb-1">2. รันวงกลอน ๘</p>
-                        <p>แอปสุ่ม "หัวข้อ" กลางวง จากนั้นทุกคนผลัดกันแต่งกลอนต่อกันไปเรื่อยๆ ตามธรรมชาติ ไม่ต้องรอแอปจัดคิว</p>
+                        <p class="font-bold text-pink-400 mb-1">2. รันวงกลอน</p>
+                        <p>แอปสุ่ม "หัวข้อ" แล้วทุกคนผลัดกันต่อกลอนไปเรื่อยๆ ตามคิวธรรมชาติ</p>
                     </div>
                     <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-red-500">
-                        <p class="font-bold text-red-400 mb-1">3. จ้องจับโป๊ะ!</p>
-                        <p>ถ้าเห็นใคร <strong>พูดคำศัพท์</strong> หรือ <strong>ทำท่าทาง</strong> ตรงกับไพ่ของเรา กดใช้การ์ดแทรกวงแฉได้เลยตลอดเวลา!</p>
+                        <p class="font-bold text-red-400 mb-1">3. จับโป๊ะ</p>
+                        <p>ใครพูดคำศัพท์ หรือ ทำท่าตรงไพ่เรา กด <strong>ใช้การ์ด</strong> แทรกได้ทันที!</p>
                     </div>
                     <div class="bg-gray-800/60 p-3 rounded-xl border-l-4 border-green-500">
-                        <p class="font-bold text-green-400 mb-1">4. ผู้ชนะ</p>
-                        <p>ใครจับผิดเพื่อนจนทิ้งไพ่หมดมือได้ก่อน คือผู้ชนะ!</p>
+                        <p class="font-bold text-green-400 mb-1">4. เงื่อนไขชนะ</p>
+                        <p>เป้าหมายคือทิ้งไพ่ให้หมด! ใครไพ่หมดมือคนแรก คือผู้ชนะ</p>
                     </div>
                 </div>
 
-                <!-- ตัวอย่างสถานการณ์ -->
-                <div class="border-t border-gray-600/50 pt-4">
-                    <h3 class="text-lg font-bold text-green-400 mb-3 flex items-center gap-2">
-                        💡 ตัวอย่างจำลองเหตุการณ์
+                <!-- จำลองสถานการณ์ -->
+                <div class="border-t border-gray-600/50 pt-5">
+                    <h3 class="text-xl font-bold text-green-400 mb-4 flex items-center gap-2">
+                        💡 จำลองสถานการณ์จริง (คุณคือ แก้ว)
                     </h3>
-                    <div class="bg-black/40 p-4 rounded-xl border border-gray-700/50 space-y-3">
-                        <p class="text-[13px]"><span class="text-pink-400 font-bold">🃏 ไพ่ในมือคุณ:</span> คำศัพท์ [หิว, กิน, ต้นไม้] | ท่า [เกาหัว]</p>
-                        
-                        <div class="space-y-2.5 text-[13px]">
-                            <p class="flex gap-2"><span>1️⃣</span> <span><strong>เพื่อน (กอล์ฟ) เริ่มแต่ง:</strong> "ในคืนนี้ช่าง <span class="text-yellow-400 font-bold text-base">หิว</span> จนตาลาย"</span></p>
-                            <p class="flex gap-2"><span>2️⃣</span> <span><strong>คุณหูผึ่ง!</strong> รีบกดปุ่ม <span class="text-red-400 font-bold">🚨 ขอใช้การ์ด!!</span> แทรกทันที (ไม่ต้องรอให้กอล์ฟพูดจบ)</span></p>
-                            <p class="flex gap-2"><span>3️⃣</span> <span><strong>วงหยุดชะงัก:</strong> คุณเลือกจับผิดกอล์ฟด้วยคำว่า "หิว"</span></p>
-                            <p class="flex gap-2"><span>4️⃣</span> <span><strong>โดนลงโทษ:</strong> คุณได้ทิ้งไพ่ใบนั้น! ส่วนกอล์ฟโดนทำโทษ <strong>"จั่วไพ่เพิ่ม 1 ใบ"</strong> ทันที 😈</span></p>
-                        </div>
-
-                        <div class="bg-gray-800/50 p-2 mt-3 rounded-lg border-l-2 border-blue-400 text-gray-300 text-xs">
-                            👀 <strong>*จับผิดท่าทางก็ทำได้:</strong> ถ้าระหว่างคิดกลอนเพื่อนเผลอ <strong>เกาหัว</strong> คุณก็ชิงกดปุ่มใช้การ์ดแฉได้เหมือนกัน!
-                        </div>
+                    
+                    <!-- สถานการณ์ 1 -->
+                    <div class="bg-black/40 p-4 rounded-xl border border-gray-700/50 mb-4">
+                        <h4 class="text-pink-400 font-bold mb-2">🎬 สถานการณ์ 1: จับโป๊ะคำศัพท์ (ตาไวหูไว)</h4>
+                        <p class="text-[13px] text-gray-400 mb-2">ไพ่ในมือคุณมีคำว่า: <span class="text-white font-bold bg-gray-800 px-1 rounded">หิว</span>, <span class="text-white font-bold bg-gray-800 px-1 rounded">กิน</span>, <span class="text-white font-bold bg-gray-800 px-1 rounded">หมู</span></p>
+                        <ul class="space-y-2 text-[13px] ml-1">
+                            <li class="flex gap-2"><span>👤</span> <span><strong>กอล์ฟ (กำลังแต่งกลอน):</strong> "ในคืนนี้ฉันช่าง <span class="text-yellow-400 font-bold text-base">หิว</span> จนตาลาย"</span></li>
+                            <li class="flex gap-2"><span>⚡</span> <span><strong>คุณหูผึ่ง!</strong> ไม่รอให้พูดจบ รีบกดปุ่ม <span class="text-red-400 font-bold">🚨 ขอใช้การ์ด!!</span> ทันที</span></li>
+                            <li class="flex gap-2"><span>🎯</span> <span><strong>ผลลัพธ์:</strong> วงหยุด! คุณแจ้งว่าจับกอล์ฟคำว่า "หิว" คุณทิ้งไพ่สำเร็จ 1 ใบ ส่วนกอล์ฟโดนทำโทษต้องจั่วไพ่เพิ่ม 1 ใบเข้ามือ</span></li>
+                        </ul>
                     </div>
-                </div>
 
+                    <!-- สถานการณ์ 2 -->
+                    <div class="bg-black/40 p-4 rounded-xl border border-gray-700/50 mb-4">
+                        <h4 class="text-blue-400 font-bold mb-2">🎬 สถานการณ์ 2: จับโป๊ะท่าทาง (ตาดีได้เปรียบ)</h4>
+                        <p class="text-[13px] text-gray-400 mb-2">ไพ่ในมือคุณมีท่าทาง: <span class="text-white font-bold bg-gray-800 px-1 rounded">เกาหัว</span></p>
+                        <ul class="space-y-2 text-[13px] ml-1">
+                            <li class="flex gap-2"><span>👤</span> <span><strong>เก่ง (นึกคำไม่ออก):</strong> "เอ่อ... อันตัวฉัน... (เผลอยกมือขึ้นมา <span class="text-blue-300 font-bold text-base">เกาหัว</span>)"</span></li>
+                            <li class="flex gap-2"><span>⚡</span> <span><strong>คุณตาไว!</strong> เห็นปุ๊บกดปุ่ม <span class="text-red-400 font-bold">🚨 ขอใช้การ์ด!!</span> แบบรัวๆ</span></li>
+                            <li class="flex gap-2"><span>🎯</span> <span><strong>ผลลัพธ์:</strong> คุณจับโป๊ะว่าเก่งเกาหัว! เก่งเถียงไม่ออก คุณได้ทิ้งไพ่ 1 ใบ ส่วนเก่งต้องรับไพ่ใหม่ไปเพิ่ม 1 ใบ</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- สถานการณ์ 3 -->
+                    <div class="bg-black/40 p-4 rounded-xl border border-gray-700/50">
+                        <h4 class="text-yellow-400 font-bold mb-2">🎬 สถานการณ์ 3: โค้งสุดท้ายสู่ชัยชนะ</h4>
+                        <ul class="space-y-2 text-[13px] ml-1">
+                            <li class="flex gap-2"><span>🃏</span> <span>คุณจับผิดเพื่อนเก่งมาก จนตอนนี้ **ไพ่ในมือเหลือ 0 ใบ** แล้ว!</span></li>
+                            <li class="flex gap-2"><span>🏆</span> <span>แอปจะประกาศให้คุณเป็น **ผู้ชนะประจำวงกลอน** ทันที ส่วนคนที่เหลือต้องโดนทำโทษตามกติกาของวง!</span></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ปุ่มปิดด้านล่าง -->
+            <div class="pt-4 border-t border-gray-700 mt-auto">
+                <button onclick="toggleRulesModal(false)" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 rounded-xl transition border border-gray-500">
+                    เข้าใจแล้ว ปิดหน้าต่างนี้
+                </button>
             </div>
         </div>
-
     </div>
 
+    <!-- Script สำหรับเปิด/ปิด Modal วิธีเล่น -->
+    <script>
+        function toggleRulesModal(show) {
+            const modal = document.getElementById('modal-rules');
+            if (show) {
+                modal.classList.remove('hidden-modal');
+            } else {
+                modal.classList.add('hidden-modal');
+            }
+        }
+    </script>
 </body>
 </html>
